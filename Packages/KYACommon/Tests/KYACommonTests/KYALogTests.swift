@@ -24,24 +24,21 @@ final class KYALogTests: XCTestCase {
 
     // MARK: - logger(for:) category creation
 
-    func testLoggerForCategoryReturnsValidLogger() {
-        let logger = log.logger(for: "TestCategory")
-        // Logger is a valid struct; successful creation = pass
-        _ = logger
+    func testLogForCategoryReturnsOSLog() {
+        let osLog = log.log(for: "TestCategory")
+        _ = osLog
     }
 
-    func testLoggerForCategoryCachesRepeatedCalls() {
-        // Repeated calls for the same category should succeed (caching works)
-        _ = log.logger(for: "CacheTest")
-        _ = log.logger(for: "CacheTest")
-        _ = log.logger(for: "CacheTest")
+    func testLogForCategoryCachesRepeatedCalls() {
+        _ = log.log(for: "CacheTest")
+        _ = log.log(for: "CacheTest")
+        _ = log.log(for: "CacheTest")
     }
 
-    func testLoggerForMultipleCategories() {
-        // Different categories should each create valid loggers
-        _ = log.logger(for: "CategoryA")
-        _ = log.logger(for: "CategoryB")
-        _ = log.logger(for: "Default")
+    func testLogForMultipleCategories() {
+        _ = log.log(for: "CategoryA")
+        _ = log.log(for: "CategoryB")
+        _ = log.log(for: "Default")
     }
 
     // MARK: - Log methods (functional smoke tests)

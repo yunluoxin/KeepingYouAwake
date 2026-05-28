@@ -63,7 +63,7 @@ final class StatusItemController: NSObject {
     override init() {
         // Create the status item and configure properties that don't reference self.
         let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem.highlightMode = !UserDefaults.standard.kya_isMenuBarIconHighlightDisabled
+        statusItem.highlightMode = !UserDefaults.standard.kya_menuBarIconHighlightDisabled
 
         if statusItem.responds(to: NSSelectorFromString("behavior")) {
             // The `behavior` property was introduced in macOS 10.14.

@@ -19,7 +19,7 @@ final class EventHandler {
         label: "info.marcel-dierkes.KeepingYouAwake.EventQueue"
     )
     private var actions: [String: (Event) -> Void] = [:]
-    private let log: OSLog = KYALogCreateWithCategory("ApplicationEvents")!
+    private let log: OSLog = KYALog.shared.log(for: "ApplicationEvents")
 
     /// Registers a block that will be executed when an event with
     /// the supplied name is handled.
@@ -53,8 +53,7 @@ final class EventHandler {
             let event = self.eventFromURL(url)
             guard let block = self.actions[event.name] else { return }
 
-            os_log("Handling event: %{public}@ for URL: %{public}@",
-                   log: self.log, event.description, url.absoluteString)
+            KYALog.shared.debug("Handling event: \(event.description) for URL: \(url.absoluteString)")
 
             DispatchQueue.main.sync {
                 block(event)

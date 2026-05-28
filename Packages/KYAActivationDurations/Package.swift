@@ -17,7 +17,7 @@ let package = Package(
         .target(
             name: "KYAActivationDurations",
             dependencies: [
-                .product(name: "KYACommonSwift", package: "KYACommon"),
+                .product(name: "KYACommon", package: "KYACommon"),
             ]
         ),
         .testTarget(

@@ -6,8 +6,9 @@
 //
 
 import Foundation
-import os.log
+import AppKit
 import KYAApplicationSupport
+import KYACommon
 
 /// A time interval value representing indefinite scheduling (no timeout).
 /// Pass this value to ``SleepWakeTimer/schedule(timeInterval:completion:)``
@@ -52,12 +53,8 @@ public final class SleepWakeTimer {
     private var caffeinateProcess: Process?
     private var terminationObserver: NSObjectProtocol?
 
-    // Logging uses os_log directly; will switch to KYALog.shared once
-    // KYACommon is rewritten in Swift.
-    private let log = os_log_create(
-        "info.marcel-dierkes.KeepingYouAwake",
-        "SleepWakeTimer"
-    )
+    // Logging via KYALog unified class
+    private let log = KYALog.shared.log(for: "SleepWakeTimer")
 
     public init() {
         // Terminate all remaining tasks on app quit
@@ -89,7 +86,7 @@ public final class SleepWakeTimer {
         timeInterval: TimeInterval,
         completion: ((Bool) -> Void)? = nil
     ) {
-        os_log(log, "SleepWakeTimer will activate with time interval %{public}.0f.", timeInterval)
+        KYALog.shared.debug("SleepWakeTimer will activate with time interval \(String(format: "%.0f", timeInterval))", category: "SleepWakeTimer")
 
         onActivate?(timeInterval)
 
@@ -160,13 +157,9 @@ public final class SleepWakeTimer {
         }
 
         do {
-            process.run()
+            try process.run()
         } catch {
-            os_log(
-                log,
-                "Failed to launch caffeinate: %{public}s",
-                error.localizedDescription
-            )
+            KYALog.shared.error("Failed to launch caffeinate: \(error.localizedDescription)", category: "SleepWakeTimer")
             handleTermination(cancelled: true)
         }
     }
@@ -193,6 +186,6 @@ public final class SleepWakeTimer {
             deactivate?()
         }
 
-        os_log(log, "SleepWakeTimer did deactivate.")
+        KYALog.shared.debug("SleepWakeTimer did deactivate.", category: "SleepWakeTimer")
     }
 }

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import KYACommonSwift
+import KYACommon
 
 /// A sleepwake timer activation duration.
 ///

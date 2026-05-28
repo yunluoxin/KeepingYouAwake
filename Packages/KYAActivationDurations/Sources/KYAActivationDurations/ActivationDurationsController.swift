@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import KYACommonSwift
+import KYACommon
 
 /// Manages adding and removing of activation durations, persistence,
 /// and provides the ability to mark a duration as the default.

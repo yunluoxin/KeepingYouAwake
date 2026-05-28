@@ -10,7 +10,17 @@ let package = Package(
         .library(name: "KYACommon", targets: ["KYACommon"]),
     ],
     targets: [
-        .target(name: "KYACommon"),
-        .testTarget(name: "KYACommonTests", dependencies: ["KYACommon"]),
+        .target(
+            name: "CLogShim",
+            publicHeadersPath: "include"
+        ),
+        .target(
+            name: "KYACommon",
+            dependencies: ["CLogShim"]
+        ),
+        .testTarget(
+            name: "KYACommonTests",
+            dependencies: ["KYACommon"]
+        ),
     ]
 )

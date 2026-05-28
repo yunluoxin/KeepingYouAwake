@@ -49,8 +49,8 @@ Replace Obj-C patterns with Swift-native alternatives:
 | `KYA_L10N_*` macros | `KYAL10n` namespace wrapping `NSLocalizedString` | All UI strings |
 | `Auto`/`AutoVar`/`AutoWeak` macros | Swift `let`/`var`/`weak var` type inference | All local variables |
 | `KYA_EXPORT` macro | Swift `public` access modifier | All cross-module symbols |
-| `KYALogCreateWithCategory()` | Swift wrapper around `os_log_create()`/`os_log_debug()` C functions | All logging |
-| Internal package `*Log.h/.m` files | Eliminated — each package uses the `KYALog` Swift wrapper directly | All packages |
+| `KYALogCreateWithCategory()` | Unified `KYALog` Swift class with global enable/disable control, wrapping `os_log_create()`/`os_log_debug()` C functions | All logging |
+| Internal package `*Log.h/.m` files | Eliminated — each package uses `KYALog.shared` directly | All packages |
 
 ### Notification-to-Closure Mapping
 
@@ -58,9 +58,9 @@ Concrete replacement for each app-internal notification:
 
 | Current Notification | Swift Replacement |
 |---|---|
-| `KYADeviceParameterDidChangeNotification` | `KYADevice.onChange` callback closure |
-| `kKYABatteryCapacityThresholdDidChangeNotification` | `KYAAppController` directly calls battery settings VC callback, or `NotificationCenter.default` with a `Notification.Name` constant |
-| `KYAActivationDurationsDidChangeNotification` | `KYAActivationDurationsController.onChangeDurations` callback closure |
+| `KYADeviceParameterDidChangeNotification` | `Device.onChange` callback closure |
+| `kKYABatteryCapacityThresholdDidChangeNotification` | `AppController` directly calls battery settings VC callback, or `NotificationCenter.default` with a `Notification.Name` constant |
+| `KYAActivationDurationsDidChangeNotification` | `ActivationDurationsController.onChangeDurations` callback closure |
 | `NSProcessInfo.powerStateDidChangeNotification` | Keep `NotificationCenter.default` (system API) |
 | System display change notifications | Keep `NotificationCenter.default` (system API) |
 
@@ -68,12 +68,13 @@ Concrete replacement for each app-internal notification:
 
 ### Identifier Conventions
 
-- **KYA prefix stays**: All classes, protocols, and constants use the `KYA` prefix (KeepingYouAwake), matching the existing convention.
-- Swift naming conventions apply within the prefix (e.g., `KYASleepWakeTimer`, `KYABatteryMonitor`, not `KYA_sleepWakeTimer`).
+- **No KYA prefix for Swift types**: Swift classes, structs, enums, and protocols use plain names without the `KYA` prefix (e.g., `SleepWakeTimer`, `BatteryMonitor`, `Device`, not `KYASleepWakeTimer`). Swift modules already provide namespace isolation, so the Obj-C prefix convention is unnecessary in Swift.
+- **KYA prefix stays for**: (1) SPM package names (`KYACommon`, `KYAApplicationSupport`, etc.) — these are module names, not type names; (2) UserDefaults key strings (`kya_processMonitoringEnabled`, etc.); (3) Notification.Name string constants where they reference legacy key names; (4) Bundle identifier (`info.marcel-dierkes.KeepingYouAwake`); (5) `#if` compilation flags (`KYA_APP_UPDATER_ENABLED`).
+- Localization namespace `KYAL10n` keeps its prefix since it's a convenience wrapper referencing existing `.xcstrings` key names that start with `KYA_L10N_`.
 
 ### Delegate vs. Closure Rule
 
-Use closures for all custom communication patterns. Keep delegates only where AppKit runtime requires them (`NSApplicationDelegate`, `NSMenuDelegate`, `NSWindowDelegate`, `NSStatusItem.button.target`). Specifically, `KYASleepWakeTimerDelegate` is replaced with closures (`onActivate`/`onDeactivate`) since it is not an AppKit protocol. No dual delegate+closure patterns — pick one and stick with it.
+Use closures for all custom communication patterns. Keep delegates only where AppKit runtime requires them (`NSApplicationDelegate`, `NSMenuDelegate`, `NSWindowDelegate`, `NSStatusItem.button.target`). Specifically, `SleepWakeTimerDelegate` is replaced with closures (`onActivate`/`onDeactivate`) since it is not an AppKit protocol. No dual delegate+closure patterns — pick one and stick with it.
 
 ## Package Rewrite Order
 
@@ -102,15 +103,15 @@ Each package is rewritten completely before moving to the next. Tests are rewrit
 - `Auto`/`AutoVar` → `let`/`var`
 - `AutoWeak` → `weak var`
 - `KYA_EXPORT` → Not needed (Swift module visibility is automatic with `public`)
-- `KYALogCreateWithCategory()` → Swift wrapper around `os_log_create()` C function (available on macOS 10.12+, not the `os.Logger` struct which requires macOS 11+). Creates an `os_log_t` and provides convenience methods that call `os_log_debug()`, `os_log_info()`, `os_log_error()`.
+- `KYALogCreateWithCategory()` → Unified `KYALog` Swift class that wraps `os_log_create()` C function (available on macOS 10.12+, not the `os.Logger` struct which requires macOS 11+). `KYALog` provides: (1) centralized logging with per-category `os_log_t` handles, (2) a global `isEnabled` switch to enable/disable all logging output, and (3) convenience methods (`debug()`, `info()`, `error()`) that check the switch before calling `os_log_debug()/os_log_info()/os_log_error()`. Disable logging entirely in release builds or toggle at runtime for debugging.
 
 **Result**: ~2 Swift files:
-- `KYALog.swift` — convenience wrapper around C `os_log` functions with the app subsystem `"info.marcel-dierkes.KeepingYouAwake"`
+- `KYALog.swift` — Unified logging class with global enable/disable control, per-category `os_log_t` handles, and convenience methods. Subsystem `"info.marcel-dierkes.KeepingYouAwake"`.
 - `KYACommon.swift` — any shared utility types/constants needed by other packages
 
 The package becomes minimal. Other packages import `KYACommon` and use native Swift type inference + `KYALog` directly.
 
-**Why**: Obj-C macros served to compensate for language limitations Swift doesn't have. Eliminating them simplifies every dependent package. Using C `os_log` functions (not `os.Logger`) preserves the macOS 10.13 deployment target. All internal `*Log.h/.m` files in other packages are eliminated — they just use the `KYALog` wrapper directly.
+**Why**: Obj-C macros served to compensate for language limitations Swift doesn't have. Eliminating them simplifies every dependent package. A unified `KYALog` class with enable/disable control replaces both the `KYALogCreateWithCategory()` macro and the per-package `*Log.h/.m` boilerplate — all packages use `KYALog.shared` directly. Using C `os_log` functions (not `os.Logger`) preserves the macOS 10.13 deployment target.
 
 ### 2. KYAApplicationSupport
 
@@ -120,38 +121,38 @@ The package becomes minimal. Other packages import `KYACommon` and use native Sw
 - `NSUserDefaults+KYAKeys` → `extension UserDefaults` with computed properties. Replace `KYA_GENERATE_BOOL_PROPERTY` macro with individual computed properties using `bool(forKey:)`/`set(_:forKey:)` pairs. The 12 `KYA_EXPORT NSString * const KYAUserDefaultsKey...` constants become `static let` constants in an enum namespace `KYAUserDefaultsKey` or are absorbed as string literals within each computed property.
 - `NSApplication+KYALaunchAtLogin` → `extension NSApplication` using `ServiceManagement.SMAppService` via `@available(macOS 13, *)` checks, with legacy `SMLoginItemSetEnabled` fallback for older macOS (same pattern as existing Obj-C code).
 - `NSBundle+KYAVersion` → `extension Bundle` with computed `versionString`, `buildNumber` properties.
-- `KYADisplayParametersGetNumberOfExternalDisplays()` → Swift enum namespace `KYADisplayParameters` with static method `numberOfExternalDisplays` that calls `CGGetActiveDisplayList` (CoreGraphics C function) directly from Swift. This is a computed value (count of connected external displays with mirroring detection), not a persisted struct. Not `Codable`.
+- `KYADisplayParametersGetNumberOfExternalDisplays()` → Swift enum namespace `DisplayParameters` with static method `numberOfExternalDisplays` that calls `CGGetActiveDisplayList` (CoreGraphics C function) directly from Swift. This is a computed value (count of connected external displays with mirroring detection), not a persisted struct. Not `Codable`.
 - `KYAApplicationSupportLog.h/.m` → Eliminated. Package uses `KYALog` from KYACommon directly.
 
 **Result**: ~4-5 Swift files.
 
-**Why**: Swift extensions and computed properties replace category methods and macros more cleanly. `KYADisplayParameters` is a C function that counts displays — it stays a function, not a struct.
+**Why**: Swift extensions and computed properties replace category methods and macros more cleanly. `DisplayParameters` is a C function that counts displays — it stays a function, not a struct.
 
 ### 3. KYADeviceInfo
 
-**Current**: 12 files (headers + implementations, ~1,073 lines total). Contains `KYADevice`, `KYABatteryMonitor`, `KYALowPowerModeMonitor`, `KYAProcessMonitor` (all now organized in subdirectories with `+Private.h` headers).
+**Current**: 12 files (headers + implementations, ~1,073 lines total). Contains `Device`, `BatteryMonitor`, `LowPowerModeMonitor`, `ProcessMonitor` (all now organized in subdirectories with `+Private.h` headers).
 
 **Swift rewrite**:
-- **Common monitor pattern**: The three monitors (`Battery`, `LowPowerMode`, `Process`) share identical structure (register/unregister, handler callback, main-queue dispatch). In Swift, define a `KYAMonitor` protocol with `register()`, `unregister()`, and an `onChange` callback. Each monitor implements this protocol.
-- `KYABatteryMonitor` → Swift class implementing `KYAMonitor`. Uses `NotificationCenter.default` for `NSProcessInfo.powerStateDidChangeNotification` (this is a system notification, keep it).
-- `KYALowPowerModeMonitor` → Swift class implementing `KYAMonitor`. Same system notification pattern.
-- `KYAProcessMonitor` → Swift class implementing `KYAMonitor`. Uses `Darwin.libproc` C interop (`proc_listallpids`, `proc_pidpath`) via Swift's C bridging or a small C shim. `DispatchSourceProcess` works directly in Swift. The three-layer hybrid model (polling → identification → exit detection) translates directly.
-- `KYADevice` → Swift singleton with `currentDevice` static property. Manages all monitors. Replaces `KYADeviceParameterDidChangeNotification` with an `onChange` callback closure. `KYADeviceParameterProcess` constant and other parameter constants become Swift enum cases or `String` constants.
+- **Common monitor pattern**: The three monitors (`Battery`, `LowPowerMode`, `Process`) share identical structure (register/unregister, handler callback, main-queue dispatch). In Swift, define a `Monitor` protocol with `register()`, `unregister()`, and an `onChange` callback. Each monitor implements this protocol.
+- `BatteryMonitor` → Swift class implementing `Monitor`. Uses `NotificationCenter.default` for `NSProcessInfo.powerStateDidChangeNotification` (this is a system notification, keep it).
+- `LowPowerModeMonitor` → Swift class implementing `Monitor`. Same system notification pattern.
+- `ProcessMonitor` → Swift class implementing `Monitor`. Uses `Darwin.libproc` C interop (`proc_listallpids`, `proc_pidpath`) via Swift's C bridging or a small C shim. `DispatchSourceProcess` works directly in Swift. The three-layer hybrid model (polling → identification → exit detection) translates directly.
+- `Device` → Swift singleton with `currentDevice` static property. Manages all monitors. Replaces `KYADeviceParameterDidChangeNotification` with an `onChange` callback closure. `KYADeviceParameterProcess` constant and other parameter constants become Swift enum cases or `String` constants.
 
-**KYAProcessMonitor C interop**: The `libproc.h` functions (`proc_listallpids`, `proc_pidpath`) are C functions available on Darwin. In Swift, they can be called directly after `import Darwin` (if Swift can auto-discover the declarations) or via a small C shim file (`libproc_shim.c` + `libproc_shim.h`) in the KYADeviceInfo package if needed. No Obj-C needed.
+**ProcessMonitor C interop**: The `libproc.h` functions (`proc_listallpids`, `proc_pidpath`) are C functions available on Darwin. In Swift, they can be called directly after `import Darwin` (if Swift can auto-discover the declarations) or via a small C shim file (`libproc_shim.c` + `libproc_shim.h`) in the KYADeviceInfo package if needed. No Obj-C needed.
 
-**Result**: ~5-6 Swift files for monitors + `KYADevice.swift` + `KYAMonitor.swift` protocol + optional C shim.
+**Result**: ~5-6 Swift files for monitors + `Device.swift` + `Monitor.swift` protocol + optional C shim.
 
 **Why**: The protocol consolidation eliminates boilerplate repetition across the three monitors, which is the most obvious benefit of Swift over Obj-C for this pattern.
 
 ### 4. KYAActivationDurations
 
-**Current**: `KYAActivationDuration` (Obj-C++ with C++17 chrono, `.mm` file), `KYAActivationDurationsController`, `NSUserDefaults+KYADefaultTimeInterval`, plus `KYAActivationDurationsLog.h/.m`.
+**Current**: `ActivationDuration` (Obj-C++ with C++17 chrono, `.mm` file), `ActivationDurationsController`, `NSUserDefaults+KYADefaultTimeInterval`, plus `KYAActivationDurationsLog.h/.m`.
 
 **Swift rewrite**:
-- `KYAActivationDuration` **Obj-C++ → Pure Swift**: Replace C++ `chrono`/`calendar` arithmetic with `Foundation.Calendar` and `DateComponents`. The duration model becomes a Swift struct conforming to `Codable`, `Equatable`, `Comparable`. All time arithmetic uses `Calendar.date(byAdding:)` and `DateComponents`.
-- `KYAActivationDurationsController` → Swift class managing the duration list, `UserDefaults` persistence, and change notifications. Replace `KYAActivationDurationsDidChangeNotification` with an `onChangeDurations` callback closure.
-- `NSUserDefaults+KYADefaultTimeInterval` → Swift extension on `UserDefaults` with a computed property for the default time interval (absorbed into the `KYAApplicationSupport` UserDefaults extension, or kept within the `KYAActivationDurationsController`).
+- `ActivationDuration` **Obj-C++ → Pure Swift**: Replace C++ `chrono`/`calendar` arithmetic with `Foundation.Calendar` and `DateComponents`. The duration model becomes a Swift struct conforming to `Codable`, `Equatable`, `Comparable`. All time arithmetic uses `Calendar.date(byAdding:)` and `DateComponents`.
+- `ActivationDurationsController` → Swift class managing the duration list, `UserDefaults` persistence, and change notifications. Replace `KYAActivationDurationsDidChangeNotification` with an `onChangeDurations` callback closure.
+- `NSUserDefaults+KYADefaultTimeInterval` → Swift extension on `UserDefaults` with a computed property for the default time interval (absorbed into the `KYAApplicationSupport` UserDefaults extension, or kept within the `ActivationDurationsController`).
 - `KYAActivationDurationsLog.h/.m` → Eliminated. Uses `KYALog` from KYACommon.
 
 **Result**: Eliminates the `.mm` file, C++17 requirement, and all `*Log` boilerplate entirely. ~4 Swift files.
@@ -160,33 +161,33 @@ The package becomes minimal. Other packages import `KYACommon` and use native Sw
 
 ### 5. KYAApplicationEvents
 
-**Current**: `KYAEventHandler`, `KYAEvent` (model class with `name`/`arguments`, conforming to `NSCopying`), `KYAEventHandler+KYADefaultEventHandler` (category providing default URL scheme handler).
+**Current**: `EventHandler`, `Event` (model class with `name`/`arguments`, conforming to `NSCopying`), `EventHandler+DefaultEventHandler` (category providing default URL scheme handler).
 
 **Swift rewrite**:
-- `KYAEventHandler` → Swift class handling `keepingyouawake://` URL scheme events. Parse URLs with `URLComponents` (far cleaner in Swift than `NSURL` dictionary-based parsing). Actions: `activate`, `deactivate`, `toggle` with duration parameters.
-- `KYAEvent` → Swift struct with `name: String` and `arguments: [String: String]?` properties, conforming to `Equatable` and `Hashable` (replaces Obj-C `NSCopying` conformance).
-- `KYAEventHandler+KYADefaultEventHandler` → Swift extension on `KYAEventHandler` providing the default URL scheme handler registration method.
+- `EventHandler` → Swift class handling `keepingyouawake://` URL scheme events. Parse URLs with `URLComponents` (far cleaner in Swift than `NSURL` dictionary-based parsing). Actions: `activate`, `deactivate`, `toggle` with duration parameters.
+- `Event` → Swift struct with `name: String` and `arguments: [String: String]?` properties, conforming to `Equatable` and `Hashable` (replaces Obj-C `NSCopying` conformance).
+- `EventHandler+DefaultEventHandler` → Swift extension on `EventHandler` providing the default URL scheme handler registration method.
 
 **Result**: 3 Swift files. Much cleaner URL handling in Swift.
 
 ### 6. KYASleepWakeTimer
 
-**Current**: 1 header + 1 .m (~163 lines). Contains `KYASleepWakeTimer` wrapping `/usr/bin/caffeinate`.
+**Current**: 1 header + 1 .m (~163 lines). Contains `SleepWakeTimer` wrapping `/usr/bin/caffeinate`.
 
 **Swift rewrite**:
-- `KYASleepWakeTimer` → Swift class wrapping `Process` (Swift name for `NSTask`) to run `/usr/bin/caffeinate` with `-di`/`-i` flags.
-- **Communication**: Replace `KYASleepWakeTimerDelegate` protocol with closures: `onActivate: (() -> Void)?` and `onDeactivate: (() -> Void)?`. No delegate protocol — closures only, consistent with the architecture rule.
+- `SleepWakeTimer` → Swift class wrapping `Process` (Swift name for `NSTask`) to run `/usr/bin/caffeinate` with `-di`/`-i` flags.
+- **Communication**: Replace `SleepWakeTimerDelegate` protocol with closures: `onActivate: (() -> Void)?` and `onDeactivate: (() -> Void)?`. No delegate protocol — closures only, consistent with the architecture rule.
 - `KYASleepWakeTimeIntervalIndefinite` → Swift constant or sentinel value (e.g., `TimeInterval.infinity` or a special case).
 
 **Result**: ~2 Swift files.
 
 ### 7. KYAStatusItemUI
 
-**Current**: `KYAStatusItemController`, `KYAStatusItemImageProvider`, `KYAStatusItemControllerDataSource`/`Delegate` protocols, `NSImage+KYAStatusItemImage` (category), `NSURL+KYAStatusItemImage` (category), `KYAStatusItemImageProvider+Private.h`, `KYAStatusItemUILocalizedStrings.h`.
+**Current**: `StatusItemController`, `StatusItemImageProvider`, `StatusItemControllerDataSource`/`Delegate` protocols, `NSImage+KYAStatusItemImage` (category), `NSURL+KYAStatusItemImage` (category), `KYAStatusItemImageProvider+Private.h`, `KYAStatusItemUILocalizedStrings.h`.
 
 **Swift rewrite**:
-- `KYAStatusItemController` → Swift class managing `NSStatusItem`. Programmatic menu construction — no XIB for the menu. `KYAStatusItemControllerDataSource` and `KYAStatusItemControllerDelegate` become Swift protocols. `@objc` annotation needed where `NSMenuDelegate` expects Obj-C messaging.
-- `KYAStatusItemImageProvider` → Swift class providing active/inactive icon images. Supports custom icon loading from URLs (same feature).
+- `StatusItemController` → Swift class managing `NSStatusItem`. Programmatic menu construction — no XIB for the menu. `StatusItemControllerDataSource` and `StatusItemControllerDelegate` become Swift protocols. `@objc` annotation needed where `NSMenuDelegate` expects Obj-C messaging.
+- `StatusItemImageProvider` → Swift class providing active/inactive icon images. Supports custom icon loading from URLs (same feature).
 - `NSImage+KYAStatusItemImage` → Swift extension on `NSImage` for status item rendering and template image preparation.
 - `NSURL+KYAStatusItemImage` → Swift extension on `URL` for loading custom menu bar icons from file URLs.
 - `KYAStatusItemUILocalizedStrings` → Eliminated. Replaced by `KYAL10n` namespace wrapping `NSLocalizedString`.
@@ -195,11 +196,11 @@ The package becomes minimal. Other packages import `KYACommon` and use native Sw
 
 ### 8. KYAUserNotifications
 
-**Current**: `KYAUserNotificationCenter`, `KYAUserNotification` (base class), `NSDate+RemainingTime` (category), `NSURL+KYAUserNotificationCenter` (category), `NSWorkspace+KYAUserNotificationCenter` (category).
+**Current**: `UserNotificationCenter`, `UserNotification` (base class), `NSDate+RemainingTime` (category), `NSURL+KYAUserNotificationCenter` (category), `NSWorkspace+KYAUserNotificationCenter` (category).
 
 **Swift rewrite**:
-- `KYAUserNotificationCenter` → Swift class using `UNUserNotificationCenter` via `@available(macOS 11, *)` gating, with `NSUserNotificationCenter` fallback for macOS 10.13-10.15. Permission requests use completion handlers (not async/await, which requires macOS 12+).
-- `KYAUserNotification` → Swift class with `identifier`, `title`, `subtitle`, `bodyText`, `userInfo` properties and localized setter convenience methods. Subclassable (used by `KYAActivationUserNotification` in main app).
+- `UserNotificationCenter` → Swift class using `UNUserNotificationCenter` via `@available(macOS 11, *)` gating, with `NSUserNotificationCenter` fallback for macOS 10.13-10.15. Permission requests use completion handlers (not async/await, which requires macOS 12+).
+- `UserNotification` → Swift class with `identifier`, `title`, `subtitle`, `bodyText`, `userInfo` properties and localized setter convenience methods. Subclassable (used by `ActivationUserNotification` in main app).
 - `NSDate+RemainingTime` → Swift extension on `Date` with `localizedRemainingTime` and `localizedRemainingTimeWithoutPhrase` computed properties using `DateComponentsFormatter`.
 - `NSURL+KYAUserNotificationCenter` → Swift extension on `URL` with static `notificationSettingsURL` property pointing to System Settings pane.
 - `NSWorkspace+KYAUserNotificationCenter` → Swift extension on `NSWorkspace` with `openNotificationSettings(completion:)` method for opening System Settings.
@@ -208,33 +209,33 @@ The package becomes minimal. Other packages import `KYACommon` and use native Sw
 
 ### 9. Main App
 
-**Current**: 23 headers + 22 .m (~2,261 lines). Central controller: `KYAAppController` (604 lines).
+**Current**: 23 headers + 22 .m (~2,261 lines). Central controller: `AppController` (604 lines).
 
 **Swift rewrite**:
 
 **App Controller & Delegate**:
-- `KYAAppController` → Swift class orchestrating all subsystems. Replace NSNotificationCenter wiring with direct callbacks per the notification-to-closure mapping. Programmatic menu construction for the status bar dropdown menu (all menu items built in code, matching current feature set).
-- `KYAAppDelegate` → Swift `NSApplicationDelegate` implementation (requires `@objc`). Handles Sparkle updater init (conditional on Direct scheme via `#if KYA_APP_UPDATER_ENABLED`), `applicationShouldHandleReopen:` for settings window.
-- `KYAAppUpdater` → Swift class conditionally compiled with `#if KYA_APP_UPDATER_ENABLED`. Wraps `SPUUpdater` from Sparkle (Obj-C library, accessed via Clang module import bridge). The conditional compilation flag remains as a Swift compilation condition.
+- `AppController` → Swift class orchestrating all subsystems. Replace NSNotificationCenter wiring with direct callbacks per the notification-to-closure mapping. Programmatic menu construction for the status bar dropdown menu (all menu items built in code, matching current feature set).
+- `AppDelegate` → Swift `NSApplicationDelegate` implementation (requires `@objc`). Handles Sparkle updater init (conditional on Direct scheme via `#if KYA_APP_UPDATER_ENABLED`), `applicationShouldHandleReopen:` for settings window.
+- `AppUpdater` → Swift class conditionally compiled with `#if KYA_APP_UPDATER_ENABLED`. Wraps `SPUUpdater` from Sparkle (Obj-C library, accessed via Clang module import bridge). The conditional compilation flag remains as a Swift compilation condition.
 
 **Entry Point**:
 - `main.m` → Remove entirely. Use a `@main` struct that sets up `NSApplication` programmatically (since there is no NIB to load):
   ```swift
   @main
-  struct KYAAppMain {
+  struct AppMain {
       static func main() {
           let app = NSApplication.shared
-          let delegate = KYAAppDelegate()
+          let delegate = AppDelegate()
           app.delegate = delegate
-          app.mainMenu = KYAMainMenuBuilder.build()
+          app.mainMenu = MainMenuBuilder.build()
           app.run()
       }
   }
   ```
-  This approach works because: (1) no `MainMenu.xib` exists, so the menu must be built before `run()`; (2) `NSApplicationMain()` requires a NIB/storyboard argument and would leave `mainMenu` nil without one. The `KYAMainMenuBuilder.build()` call constructs the menu before `NSApp.run()` enters the event loop.
+  This approach works because: (1) no `MainMenu.xib` exists, so the menu must be built before `run()`; (2) `NSApplicationMain()` requires a NIB/storyboard argument and would leave `mainMenu` nil without one. The `MainMenuBuilder.build()` call constructs the menu before `NSApp.run()` enters the event loop.
 
 **Main Menu**:
-- `KYAMainMenu` → Swift module with `KYAMainMenuBuilder` class (or `KYACreateMainMenu()` function) that programmatically constructs the app's `NSApplication.mainMenu`. Builds Quit, Settings, and duration submenu items. **The `MainMenu.xib` is deleted.** The `Configuration.xcconfig` key `INFOPLIST_KEY_NSMainNibFile = MainMenu` is removed, since the main menu is no longer loaded from a NIB.
+- `MainMenu` → Swift module with `MainMenuBuilder` class (or `CreateMainMenu()` function) that programmatically constructs the app's `NSApplication.mainMenu`. Builds Quit, Settings, and duration submenu items. **The `MainMenu.xib` is deleted.** The `Configuration.xcconfig` key `INFOPLIST_KEY_NSMainNibFile = MainMenu` is removed, since the main menu is no longer loaded from a NIB.
 
 **Settings Window** (Programmatic AppKit):
 
@@ -242,24 +243,24 @@ Replace all XIBs with programmatic view construction:
 
 | VC | Current XIB | Swift Implementation |
 |---|---|---|
-| `KYAGeneralSettingsViewController` | .xib | Programmatic `NSView` with checkboxes (launch at login, etc.) |
-| `KYAAdvancedSettingsViewController` | .xib | Programmatic `NSView` — battery threshold, process monitoring, display params |
-| `KYABatterySettingsViewController` | .xib | Programmatic `NSView` — battery auto-deactivation settings |
-| `KYADurationSettingsViewController` | .xib | Programmatic `NSView` with `NSTableView` for duration list |
-| `KYAAddDurationViewController` | .xib | Programmatic `NSView` / modal sheet with text fields for hours/minutes/seconds |
-| `KYADurationCell` | .xib | Programmatic `NSTableCellView` subclass (all subviews: textLabel, defaultLabel created in code) |
-| `KYAAboutSettingsViewController` | .xib | Programmatic `NSView` — app info, version, credits |
-| `KYAUpdateSettingsViewController` | .xib | Programmatic `NSView` — Sparkle update settings (Direct scheme only) |
+| `GeneralSettingsViewController` | .xib | Programmatic `NSView` with checkboxes (launch at login, etc.) |
+| `AdvancedSettingsViewController` | .xib | Programmatic `NSView` — battery threshold, process monitoring, display params |
+| `BatterySettingsViewController` | .xib | Programmatic `NSView` — battery auto-deactivation settings |
+| `DurationSettingsViewController` | .xib | Programmatic `NSView` with `NSTableView` for duration list |
+| `AddDurationViewController` | .xib | Programmatic `NSView` / modal sheet with text fields for hours/minutes/seconds |
+| `DurationCell` | .xib | Programmatic `NSTableCellView` subclass (all subviews: textLabel, defaultLabel created in code) |
+| `AboutSettingsViewController` | .xib | Programmatic `NSView` — app info, version, credits |
+| `UpdateSettingsViewController` | .xib | Programmatic `NSView` — Sparkle update settings (Direct scheme only) |
 
-- `KYASettingsWindow` → Swift `NSWindow` subclass with toolbar segment control and `NSTabView` for in-window tab switching. This recreates the current app's UX pattern (toolbar buttons to switch between tabs within a single window), not macOS native window tabs (`NSWindowTabGroup` which groups separate windows in the title bar).
-- `KYASettingsContentViewController` → Swift base class for settings tab VCs, providing common layout helpers.
+- `SettingsWindow` → Swift `NSWindow` subclass with toolbar segment control and `NSTabView` for in-window tab switching. This recreates the current app's UX pattern (toolbar buttons to switch between tabs within a single window), not macOS native window tabs (`NSWindowTabGroup` which groups separate windows in the title bar).
+- `SettingsContentViewController` → Swift base class for settings tab VCs, providing common layout helpers.
 - Layout uses `NSStackView`, `NSGridView`, `NSLayoutConstraint` — all in code.
 
 **Supporting Types in Main App**:
-- `KYAActivationUserNotification` → Swift subclass of `KYAUserNotification` (from the KYAUserNotifications package) with `init(fireDate:, activating:)`. Encapsulates notification content for timer activation/deactivation events.
-- `KYAActivationDuration+KYALocalizedTitle` → Swift extension on `KYAActivationDuration` providing a `localizedTitle` computed property using `KYAL10n`.
-- `KYABatteryCapacityThreshold` → Swift value type (struct or simple wrapper) for the battery capacity threshold setting. The `kKYABatteryCapacityThresholdDidChangeNotification` constant is replaced with either a direct callback or a `Notification.Name` static constant used with `NotificationCenter.default` (since this is an in-app notification between the advanced settings VC and the battery monitor logic, a closure is preferred but `Notification.Name` is acceptable if multiple listeners exist).
-- `KYAUserDefaultsSetting` → Swift struct with `title: String`, `key: String`, `value: Bool` computed property (reads/writes `UserDefaults.standard`), and `reset()` method. Simple model for checkbox settings rows in the advanced settings VC. Not a property wrapper — it's a UI model type.
+- `ActivationUserNotification` → Swift subclass of `UserNotification` (from the KYAUserNotifications package) with `init(fireDate:, activating:)`. Encapsulates notification content for timer activation/deactivation events.
+- `ActivationDuration+LocalizedTitle` → Swift extension on `ActivationDuration` providing a `localizedTitle` computed property using `KYAL10n`.
+- `BatteryCapacityThreshold` → Swift value type (struct or simple wrapper) for the battery capacity threshold setting. The `kKYABatteryCapacityThresholdDidChangeNotification` constant is replaced with either a direct callback or a `Notification.Name` static constant used with `NotificationCenter.default` (since this is an in-app notification between the advanced settings VC and the battery monitor logic, a closure is preferred but `Notification.Name` is acceptable if multiple listeners exist).
+- `UserDefaultsSetting` → Swift struct with `title: String`, `key: String`, `value: Bool` computed property (reads/writes `UserDefaults.standard`), and `reset()` method. Simple model for checkbox settings rows in the advanced settings VC. Not a property wrapper — it's a UI model type.
 
 **Localization in Main App**:
 - `KYALocalizedStrings.h/.m` → Remove entirely. Replace all 62 `KYA_L10N_*` `#define` macros with a `KYAL10n` Swift enum namespace wrapping `NSLocalizedString`. Example:
@@ -303,7 +304,7 @@ Replace all XIBs with programmatic view construction:
 
 ### C Interop (libproc)
 
-`KYAProcessMonitor` uses `proc_listallpids()` and `proc_pidpath()` from `<libproc.h>`. These are Darwin C functions, accessible in Swift via:
+`ProcessMonitor` uses `proc_listallpids()` and `proc_pidpath()` from `<libproc.h>`. These are Darwin C functions, accessible in Swift via:
 - Direct call after `import Darwin` (if Swift can auto-discover the header)
 - Or a small C shim file (`libproc_shim.c` + `libproc_shim.h`) in the KYADeviceInfo package if needed for function declarations that Swift can't auto-import
 
@@ -327,7 +328,7 @@ Some AppKit protocols require `@objc` dispatch for the Objective-C runtime. Swif
 
 ### Sparkle Integration
 
-Sparkle is an Obj-C library. Swift imports it via Clang module bridging. The `SPUUpdater` and related classes are accessible from Swift as if they were native. `KYAAppUpdater` wraps `SPUUpdater` and is conditionally compiled with `#if KYA_APP_UPDATER_ENABLED` (matching the Direct scheme). The App Store scheme does not include Sparkle or this wrapper.
+Sparkle is an Obj-C library. Swift imports it via Clang module bridging. The `SPUUpdater` and related classes are accessible from Swift as if they were native. `AppUpdater` wraps `SPUUpdater` and is conditionally compiled with `#if KYA_APP_UPDATER_ENABLED` (matching the Direct scheme). The App Store scheme does not include Sparkle or this wrapper.
 
 ## Tests
 
@@ -361,7 +362,7 @@ The Makefile's `test` and `test-with-sanitizers` targets remain functional with 
 
 | Risk | Mitigation |
 |---|---|
-| C++ chrono behavior not exactly replicated in Foundation | Test `KYAActivationDuration` thoroughly with edge cases (months with variable days, leap years, etc.) — Swift `Calendar` handles these correctly |
+| C++ chrono behavior not exactly replicated in Foundation | Test `ActivationDuration` thoroughly with edge cases (months with variable days, leap years, etc.) — Swift `Calendar` handles these correctly |
 | `libproc` C interop complications | Write a thin C shim if Swift can't auto-import; this is a well-known Darwin bridging pattern |
 | AppKit programmatic UI is verbose | Use layout helper extensions on `NSView` for common patterns (stack view with spacing, grid view alignment) |
 | macOS 10.13 API availability constraints | Use `NSLocalizedString` not `String(localized:)`, `os_log` C functions not `os.Logger`, completion handlers not async/await. Use `@available(macOS 11/13, *)` checks with fallbacks for newer APIs |
