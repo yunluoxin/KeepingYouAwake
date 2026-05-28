@@ -19,7 +19,7 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         if #available(macOS 11.0, *) {
             return NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: nil)
         } else {
-            return NSImage(named: NSImageNameAdvanced)
+            return NSImage(named: NSImage.advancedName)
         }
     }
 
@@ -30,24 +30,26 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         view = NSView()
 
         let scrollView = NSScrollView()
-        scrollView.borderType = .line
+        scrollView.borderType = .lineBorder
         scrollView.hasHorizontalScroller = false
         scrollView.hasVerticalScroller = true
         scrollView.autohidesScrollers = true
         scrollView.translatesAutoresizingMaskIntoConstraints = false
 
         tableView = NSTableView()
-        tableView.style = .fullWidth
+        if #available(macOS 11.0, *) {
+            tableView.style = .fullWidth
+        }
         tableView.selectionHighlightStyle = .none
         tableView.usesAlternatingRowBackgroundColors = true
         tableView.rowHeight = 30
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.columnAutoresizingStyle = .lastColumnOnly
+        tableView.columnAutoresizingStyle = .lastColumnOnlyAutoresizingStyle
         tableView.headerView = nil
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("SettingColumn"))
-        column.resizingMask = .autoResizing
+        column.resizingMask = .autoresizingMask
         tableView.addTableColumn(column)
 
         scrollView.documentView = tableView

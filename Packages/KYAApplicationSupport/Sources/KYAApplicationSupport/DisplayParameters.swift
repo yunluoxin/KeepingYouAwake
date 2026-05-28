@@ -14,7 +14,7 @@ import CoreGraphics
 /// Display-related utility functions.
 ///
 /// No KYA prefix — Swift module namespace provides isolation.
-enum DisplayParameters {
+public enum DisplayParameters {
     /// Maximum number of displays to query from CoreGraphics.
     private static let displayCountMax: UInt32 = 64
 

@@ -7,7 +7,7 @@
 //
 
 /// The appearance of the status item icon image.
-enum StatusItemAppearance {
+public enum StatusItemAppearance {
     /// Represents the inactive state of the status bar item.
     case inactive
     /// Represents the active state of the status bar item.

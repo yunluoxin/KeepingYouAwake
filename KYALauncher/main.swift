@@ -9,5 +9,6 @@
 import AppKit
 
 let app = NSApplication.shared
-app.delegate = AppDelegate()
+let appDelegate = AppDelegate()
+app.delegate = appDelegate
 app.run()

@@ -11,13 +11,13 @@ import KYAApplicationSupport
 import KYACommon
 
 /// Data source protocol for providing a menu to the status item controller.
-protocol StatusItemControllerDataSource: AnyObject {
+public protocol StatusItemControllerDataSource: AnyObject {
     /// The menu that is displayed when the status item is right-clicked.
     func menuForStatusItemController(_ controller: StatusItemController) -> NSMenu?
 }
 
 /// Delegate protocol for receiving primary click actions from the status item.
-protocol StatusItemControllerDelegate: AnyObject {
+public protocol StatusItemControllerDelegate: AnyObject {
     /// Notifies the delegate that the primary click action was invoked.
     func statusItemControllerShouldPerformPrimaryAction(_ controller: StatusItemController)
 }
@@ -26,18 +26,18 @@ protocol StatusItemControllerDelegate: AnyObject {
 ///
 /// Inherits from NSObject to support @objc target/action for NSStatusItem.button
 /// and KVO compliance for the `appearance` property.
-final class StatusItemController: NSObject {
+public final class StatusItemController: NSObject {
     /// The underlying system status bar item.
-    @objc private(set) var systemStatusItem: NSStatusItem
+    @objc public private(set) var systemStatusItem: NSStatusItem
 
     /// A data source for providing a menu.
-    weak var dataSource: StatusItemControllerDataSource?
+    public weak var dataSource: StatusItemControllerDataSource?
 
     /// A delegate for receiving click events.
-    weak var delegate: StatusItemControllerDelegate?
+    public weak var delegate: StatusItemControllerDelegate?
 
     /// Controls the active/inactive appearance of the status item image.
-    var appearance: StatusItemAppearance {
+    public var appearance: StatusItemAppearance {
         get {
             let provider = StatusItemImageProvider.currentProvider
             return systemStatusItem.button?.image == provider.activeIconImage
@@ -60,7 +60,7 @@ final class StatusItemController: NSObject {
         }
     }
 
-    override init() {
+    public override init() {
         // Create the status item and configure properties that don't reference self.
         let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.highlightMode = !UserDefaults.standard.kya_menuBarIconHighlightDisabled

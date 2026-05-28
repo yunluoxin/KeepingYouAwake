@@ -86,7 +86,7 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
             warningLabel.bottomAnchor.constraint(equalTo: warningContainer.bottomAnchor, constant: -8),
         ])
 
-        let cancelButton = NSButton(title: KYAL10n.cancel, target: self, action: #selector(dismissController(_:)))
+        let cancelButton = NSButton(title: KYAL10n.cancel, target: self, action: #selector(cancelAction))
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.bezelStyle = .rounded
         cancelButton.keyEquivalent = "\u{1b}"
@@ -129,6 +129,10 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         resetValues()
+    }
+
+    @objc func cancelAction(_ sender: Any?) {
+        dismiss(self)
     }
 
     @objc func addDuration(_ sender: Any?) {
@@ -219,7 +223,7 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
     }
 
     private func bindWarningLabel() {
-        let options: [NSBindingOption: Any] = [.valueForNull: "", .nullValue: ""]
+        let options: [NSBindingOption: Any] = [NSBindingOption(rawValue: "NSNullPlaceholder"): ""]
         warningLabel.bind(.value, to: self, withKeyPath: "errorMessage", options: options)
     }
 

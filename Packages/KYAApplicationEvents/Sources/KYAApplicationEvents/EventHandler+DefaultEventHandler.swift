@@ -11,7 +11,7 @@ import ApplicationServices
 extension EventHandler {
     /// Configures the event handler to be the default for the current
     /// application and prepares itself for handling incoming URL scheme events.
-    func registerAsDefaultEventHandler() {
+    public func registerAsDefaultEventHandler() {
         NSAppleEventManager.shared().setEventHandler(
             self,
             andSelector: #selector(handleGetURLEvent(_:withReplyEvent:)),

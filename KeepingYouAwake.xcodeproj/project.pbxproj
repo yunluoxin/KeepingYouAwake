@@ -172,11 +172,11 @@
 		00FA00000100000000000005 /* AppController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppController.swift; sourceTree = "<group>"; };
 		00FA00000100000000000007 /* MainMenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuBuilder.swift; sourceTree = "<group>"; };
 		00FA00000100000000000009 /* KYAL10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KYAL10n.swift; sourceTree = "<group>"; };
-		00FA0000010000000000000B /* KYAL10n+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KYAL10n+Settings.swift; sourceTree = "<group>"; };
+		00FA0000010000000000000B /* KYAL10n+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KYAL10n+Settings.swift"; sourceTree = "<group>"; };
 		00FA0000010000000000000D /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
 		00FA0000010000000000000F /* ActivationUserNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivationUserNotification.swift; sourceTree = "<group>"; };
 		00FA00000100000000000011 /* ActivationDurationsMenuController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivationDurationsMenuController.swift; sourceTree = "<group>"; };
-		00FA00000100000000000013 /* ActivationDuration+LocalizedTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivationDuration+LocalizedTitle.swift; sourceTree = "<group>"; };
+		00FA00000100000000000013 /* ActivationDuration+LocalizedTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActivationDuration+LocalizedTitle.swift"; sourceTree = "<group>"; };
 		00FA00000100000000000015 /* UserDefaultsSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsSetting.swift; sourceTree = "<group>"; };
 		00FA00000100000000000017 /* BatteryCapacityThreshold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryCapacityThreshold.swift; sourceTree = "<group>"; };
 		00FA00000100000000000019 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
@@ -233,6 +233,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DA637B3019F14693004C8838 = {
+			isa = PBXGroup;
+			children = (
+				DA637B3B19F14693004C8838 /* KeepingYouAwake */,
+				DA658E6C21CE907B0049F4C1 /* KYALauncher */,
+				DA637B3A19F14693004C8838 /* Products */,
+				DA25062727C244240052CCD8 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
 		DA25062727C244240052CCD8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (

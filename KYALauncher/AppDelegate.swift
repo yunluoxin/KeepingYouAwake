@@ -11,12 +11,15 @@ import AppKit
 @objc(AppDelegate)
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let pathComponents = Bundle.main.bundlePath.pathComponents
-        let pathRange = NSRange(location: 0, length: pathComponents.count - 4)
-        let trimmedComponents = (pathComponents as NSArray).subarray(with: pathRange) as! [String]
-
-        let parentAppPath = String(pathWithComponents: trimmedComponents)
-        NSWorkspace.shared.launchApplication(parentAppPath)
+        let pathComponents = Bundle.main.bundlePath.components(separatedBy: "/")
+        let trimmedComponents = pathComponents.dropLast(4)
+        let parentAppPath = trimmedComponents.joined(separator: "/")
+        if #available(macOS 11.0, *) {
+            let url = URL(fileURLWithPath: "/" + parentAppPath)
+            NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+        } else {
+            NSWorkspace.shared.launchApplication(parentAppPath)
+        }
 
         NSApplication.shared.terminate(nil)
     }

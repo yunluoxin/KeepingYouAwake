@@ -39,21 +39,22 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
         mainView.translatesAutoresizingMaskIntoConstraints = false
 
         tableView = NSTableView()
-        tableView.style = .inset
+        if #available(macOS 11.0, *) {
+            tableView.style = .inset
+        }
         tableView.rowHeight = 24
         tableView.rowSizeStyle = .medium
         tableView.usesAlternatingRowBackgroundColors = true
         tableView.allowsMultipleSelection = false
-        tableView.columnReordering = false
-        tableView.columnResizing = false
-        tableView.autosaveColumns = false
+        tableView.allowsColumnReordering = false
+        tableView.allowsColumnResizing = false
         tableView.dataSource = self
         tableView.delegate = self
         tableView.doubleAction = #selector(setDefaultDuration(_:))
         tableView.target = self
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("DurationColumn"))
-        column.resizingMask = .resizeWithTable
+        column.resizingMask = .autoresizingMask
         tableView.addTableColumn(column)
 
         let clipView = NSClipView()
@@ -101,7 +102,7 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
             NSImage(named: NSImage.addTemplateName)!
         ], trackingMode: .momentary, target: self, action: #selector(toggleSegmentedControl(_:)))
         segmentedControl.translatesAutoresizingMaskIntoConstraints = false
-        segmentedControl.style = .separated
+        segmentedControl.segmentStyle = .separated
 
         let bottomStack = NSStackView(views: [resetButton, setDefaultButton, segmentedControl])
         bottomStack.translatesAutoresizingMaskIntoConstraints = false
@@ -156,7 +157,7 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
 
     @objc func addDuration(_ sender: Any?) {
         let controller = AddDurationViewController(activationDurationsController: durationsController)
-        presentViewControllerAsSheet(controller)
+        presentAsSheet(controller)
     }
 
     @objc func removeDuration(_ sender: Any?) {
@@ -185,9 +186,9 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
         alert.messageText = KYAL10n.durationsAlertReallyResetTitle
         alert.informativeText = KYAL10n.durationsAlertReallyResetMessage
 
-        let okButton = alert.addButtonWithTitle(KYAL10n.durationsAlertReallyResetTitle)
+        let okButton = alert.addButton(withTitle: KYAL10n.durationsAlertReallyResetTitle)
         okButton.tag = NSApplication.ModalResponse.OK.rawValue
-        alert.addButtonWithTitle(KYAL10n.cancel)
+        alert.addButton(withTitle: KYAL10n.cancel)
 
         guard let window = view.window else { return }
         alert.beginSheetModal(for: window) { [weak self] response in
@@ -199,11 +200,11 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
 
     // MARK: - NSTableViewDataSource
 
-    func numberOfRowsInTableView(_ tableView: NSTableView) -> Int {
+    func numberOfRows(in tableView: NSTableView) -> Int {
         durationsController.activationDurations.count
     }
 
-    func tableView(_ tableView: NSTableView, objectValueForTableColumn tableColumn: NSTableColumn?, row: Int) -> Any? {
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         durationsController.activationDurations[row]
     }
 
@@ -211,7 +212,7 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let cell = DurationCellView.dequeue(from: tableView, owner: self)
-        guard let duration = self.tableView(tableView, objectValueForTableColumn: tableColumn, row: row) as? ActivationDuration else {
+        guard let duration = self.tableView(tableView, objectValueFor: tableColumn, row: row) as? ActivationDuration else {
             return cell
         }
         cell.textLabel.stringValue = duration.localizedTitle

@@ -19,9 +19,9 @@ class BatterySettingsViewController: SettingsContentViewController {
 
     override class var tabViewItemImage: NSImage? {
         if #available(macOS 11.0, *) {
-            return NSImage(systemSymbolName: "battery.100", accessibilityDescription: nil)
+            return NSImage(systemSymbolName: "battery.75", accessibilityDescription: nil)
         }
-        return NSImage(named: .computer)
+        return NSImage(named: "NSComputer")
     }
 
     override class var preferredTitle: String? {
@@ -35,7 +35,7 @@ class BatterySettingsViewController: SettingsContentViewController {
     override func loadView() {
         let mainStack = NSStackView()
         mainStack.orientation = .vertical
-        mainStack.alignment = .fill
+        mainStack.alignment = .width
         mainStack.spacing = 8
         mainStack.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         mainStack.setHuggingPriority(.defaultHigh, for: .vertical)
@@ -43,7 +43,7 @@ class BatterySettingsViewController: SettingsContentViewController {
 
         let batteryHeading = NSTextField(labelWithString:
             NSLocalizedString("Battery Level", comment: "Battery Level"))
-        batteryHeading.font = NSFont.headline
+        batteryHeading.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
         mainStack.addArrangedSubview(batteryHeading)
 
         let thresholdRow = NSStackView()
@@ -71,7 +71,7 @@ class BatterySettingsViewController: SettingsContentViewController {
 
         let thresholdIndented = NSStackView()
         thresholdIndented.orientation = .vertical
-        thresholdIndented.alignment = .fill
+        thresholdIndented.alignment = .width
         thresholdIndented.spacing = 8
         thresholdIndented.edgeInsets = NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
 
@@ -95,7 +95,7 @@ class BatterySettingsViewController: SettingsContentViewController {
 
         let lpmHeading = NSTextField(labelWithString:
             NSLocalizedString("Low Power Mode", comment: "Low Power Mode"))
-        lpmHeading.font = NSFont.headline
+        lpmHeading.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
         mainStack.addArrangedSubview(lpmHeading)
 
         lowPowerModeCheckbox = NSButton(
@@ -108,7 +108,7 @@ class BatterySettingsViewController: SettingsContentViewController {
 
         let lpmIndented = NSStackView()
         lpmIndented.orientation = .vertical
-        lpmIndented.alignment = .fill
+        lpmIndented.alignment = .width
         lpmIndented.spacing = 8
         lpmIndented.edgeInsets = NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
 
@@ -240,7 +240,7 @@ class BatterySettingsViewController: SettingsContentViewController {
 
     private func makeHeadlineLabel(_ text: String) -> NSTextField {
         let label = NSTextField(labelWithString: text)
-        label.font = NSFont.headline
+        label.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
         return label
     }
 
@@ -257,7 +257,7 @@ class BatterySettingsViewController: SettingsContentViewController {
 
     private func makeMiniLabel(_ text: String) -> NSTextField {
         let label = NSTextField(labelWithString: text)
-        label.font = .systemFont(ofSize: NSFont.miniSystemFontSize)
+        label.font = .systemFont(ofSize: 9.0)
         label.controlSize = .mini
         return label
     }

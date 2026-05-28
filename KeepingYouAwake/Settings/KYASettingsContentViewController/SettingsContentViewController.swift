@@ -28,8 +28,8 @@ class SettingsContentViewController: NSViewController {
     /// Whether the view should resize to fit its content.
     var resizesView: Bool { true }
 
-    required convenience init() {
-        self.init(nibName: nil, bundle: nil)
+    required init() {
+        super.init(nibName: nil, bundle: nil)
         title = type(of: self).preferredTitle
     }
 

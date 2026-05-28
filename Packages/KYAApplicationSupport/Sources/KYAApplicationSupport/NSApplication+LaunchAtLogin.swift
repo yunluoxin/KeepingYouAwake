@@ -28,7 +28,7 @@ extension NSApplication {
     ///
     /// On macOS 13 and later this uses `SMAppService.mainApp`.
     /// On older macOS versions this uses the legacy `SMLoginItemSetEnabled` API.
-    @objc var kya_launchAtLoginEnabled: Bool {
+    @objc public var kya_launchAtLoginEnabled: Bool {
         get {
             if #available(macOS 13, *) {
                 return Self.appServiceIsEnabled()
@@ -48,7 +48,7 @@ extension NSApplication {
     /// Migrates the application login service from `SMLoginItemSetEnabled` to
     /// `SMAppService` on macOS 13 and later.
     @available(macOS 13, *)
-    @objc func kya_migrateLaunchAtLoginToAppServiceIfNeeded() {
+    @objc public func kya_migrateLaunchAtLoginToAppServiceIfNeeded() {
         guard Self.launchAtLoginUserDefaultsExists() else { return }
 
         // If the legacy login item was enabled, transfer that state to SMAppService

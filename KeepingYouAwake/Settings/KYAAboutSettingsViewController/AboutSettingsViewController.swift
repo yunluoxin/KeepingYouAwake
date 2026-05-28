@@ -20,7 +20,7 @@ final class AboutSettingsViewController: SettingsContentViewController {
         if #available(macOS 11.0, *) {
             return NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
         } else {
-            return NSImage(named: NSImage.info)
+            return NSImage(named: NSImage.infoName)
         }
     }
 
@@ -46,14 +46,16 @@ final class AboutSettingsViewController: SettingsContentViewController {
         copyrightLabel.font = .systemFont(ofSize: 11)
 
         // Credits text view (non-editable, reads Credits.rtf)
-        let creditsScrollView = NSTextView.scrollableTextView()
-        let creditsTextView = creditsScrollView.documentView as! NSTextView
+        let creditsTextView = NSTextView()
         creditsTextView.isEditable = false
         creditsTextView.isSelectable = true
         creditsTextView.drawsBackground = false
         creditsTextView.backgroundColor = .clear
         creditsTextView.textContainerInset = NSSize(width: 0, height: 4)
         loadCredits(into: creditsTextView)
+
+        let creditsScrollView = NSScrollView()
+        creditsScrollView.documentView = creditsTextView
 
         creditsScrollView.hasVerticalScroller = true
         creditsScrollView.hasHorizontalScroller = false
@@ -92,6 +94,6 @@ final class AboutSettingsViewController: SettingsContentViewController {
         guard let url = Bundle.main.url(forResource: "Credits", withExtension: "rtf") else {
             return
         }
-        try? textView.readRTFD(from: url)
+        try? textView.readRTFD(fromFile: url.path)
     }
 }

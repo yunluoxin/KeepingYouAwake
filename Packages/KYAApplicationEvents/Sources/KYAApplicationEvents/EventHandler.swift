@@ -11,9 +11,9 @@ import os
 import KYACommon
 
 /// Handles URL scheme events by dispatching registered action blocks.
-final class EventHandler {
+public final class EventHandler {
     /// Returns the default event handler singleton.
-    static let defaultHandler = EventHandler()
+    public static let defaultHandler = EventHandler()
 
     private let eventQueue = DispatchQueue(
         label: "info.marcel-dierkes.KeepingYouAwake.EventQueue"
@@ -27,14 +27,14 @@ final class EventHandler {
     /// - Parameters:
     ///   - name: An action identifier
     ///   - block: A block executed when the event is handled
-    func registerAction(name: String, block: @escaping (Event) -> Void) {
+    public func registerAction(name: String, block: @escaping (Event) -> Void) {
         actions[name] = block
     }
 
     /// Removes the registered action and block with the supplied name.
     ///
     /// - Parameter name: An action identifier
-    func removeAction(name: String) {
+    public func removeAction(name: String) {
         actions.removeValue(forKey: name)
     }
 
@@ -44,7 +44,7 @@ final class EventHandler {
     /// Query items are collected as event arguments.
     ///
     /// - Parameter url: A callback URL
-    func handleEvent(url: URL?) {
+    public func handleEvent(url: URL?) {
         guard let url else { return }
 
         eventQueue.async { [weak self] in

@@ -7,14 +7,14 @@
 //
 
 /// Represents an event from a callback URL.
-struct Event: Equatable, Hashable, CustomStringConvertible {
+public struct Event: Equatable, Hashable, CustomStringConvertible {
     /// The event name.
-    let name: String
+    public let name: String
 
     /// Additional arguments from the callback URL.
-    let arguments: [String: String]?
+    public let arguments: [String: String]?
 
-    var description: String {
+    public var description: String {
         "Event { name: \(name), arguments: \(arguments ?? [:]) }"
     }
 }
