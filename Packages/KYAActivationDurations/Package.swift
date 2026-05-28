@@ -17,10 +17,14 @@ let package = Package(
         .target(
             name: "KYAActivationDurations",
             dependencies: [
-                .product(name: "KYACommon", package: "KYACommon"),
+                .product(name: "KYACommonSwift", package: "KYACommon"),
             ]
         ),
-        .testTarget(name: "KYAActivationDurationsTests", dependencies: ["KYAActivationDurations"]),
-    ],
-    cxxLanguageStandard: .cxx17
+        .testTarget(
+            name: "KYAActivationDurationsTests",
+            dependencies: [
+                "KYAActivationDurations",
+            ]
+        ),
+    ]
 )
