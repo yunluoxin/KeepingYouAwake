@@ -7,6 +7,7 @@
 //
 
 MACOSX_DEPLOYMENT_TARGET = 10.13
+SWIFT_VERSION = 5.9
 PRODUCT_BUNDLE_IDENTIFIER = info.marcel-dierkes.KeepingYouAwake
 
 MARKETING_VERSION = 1.6.9
@@ -15,5 +16,4 @@ CURRENT_PROJECT_VERSION = 1060900
 GENERATE_INFOPLIST_FILE = YES
 INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.utilities
 INFOPLIST_KEY_NSPrincipalClass = NSApplication
-INFOPLIST_KEY_NSMainNibFile = MainMenu
 INFOPLIST_KEY_NSHumanReadableCopyright = Copyright © 2014 – 2025 Marcel Dierkes. All rights reserved.
