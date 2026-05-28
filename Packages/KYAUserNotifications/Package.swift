@@ -20,5 +20,11 @@ let package = Package(
                 .product(name: "KYACommon", package: "KYACommon"),
             ]
         ),
+        .testTarget(
+            name: "KYAUserNotificationsTests",
+            dependencies: [
+                .target(name: "KYAUserNotifications"),
+            ]
+        ),
     ]
 )
