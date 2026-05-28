@@ -11,13 +11,21 @@ let package = Package(
         .library(name: "KYAStatusItemUI", targets: ["KYAStatusItemUI"]),
     ],
     dependencies: [
+        .package(name: "KYACommon", path: "../KYACommon"),
         .package(name: "KYAApplicationSupport", path: "../KYAApplicationSupport"),
     ],
     targets: [
         .target(
             name: "KYAStatusItemUI",
             dependencies: [
-                "KYAApplicationSupport"
+                "KYACommon",
+                "KYAApplicationSupport",
+            ]
+        ),
+        .testTarget(
+            name: "KYAStatusItemUITests",
+            dependencies: [
+                "KYAStatusItemUI",
             ]
         ),
     ]
