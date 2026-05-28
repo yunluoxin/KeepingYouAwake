@@ -10,15 +10,22 @@ let package = Package(
     products: [
         .library(name: "KYADeviceInfo", targets: ["KYADeviceInfo"]),
     ],
-    dependencies: [
-        .package(name: "KYACommon", path: "../KYACommon"),
-    ],
+    dependencies: [],
     targets: [
+        // C shim for libproc functions (proc_listallpids, proc_pidpath)
+        .target(
+            name: "ClibprocShim",
+            dependencies: []
+        ),
         .target(
             name: "KYADeviceInfo",
             dependencies: [
-                .product(name: "KYACommon", package: "KYACommon"),
+                "ClibprocShim",
             ]
+        ),
+        .testTarget(
+            name: "KYADeviceInfoTests",
+            dependencies: ["KYADeviceInfo"]
         ),
     ]
 )
