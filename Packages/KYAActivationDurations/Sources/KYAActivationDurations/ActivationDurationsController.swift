@@ -25,10 +25,15 @@ public final class ActivationDurationsController {
     /// This always includes the indefinite activation duration at index 0
     /// (or wherever 0 seconds falls in the sorted order).
     public var activationDurations: [ActivationDuration] {
+        if let cached = _cachedDurations { return cached }
         var durations = storedActivationDurations
         durations.append(ActivationDuration.indefinite)
-        return durations.sorted()
+        let sorted = durations.sorted()
+        _cachedDurations = sorted
+        return sorted
     }
+
+    private var _cachedDurations: [ActivationDuration]?
 
     /// The activation duration marked as default.
     /// Setting this persists the value to UserDefaults.
@@ -153,6 +158,7 @@ public final class ActivationDurationsController {
     }
 
     private func didChange() {
+        _cachedDurations = nil
         saveToUserDefaults()
         onChangeDurations?()
     }
