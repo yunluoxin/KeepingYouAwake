@@ -115,8 +115,10 @@ public final class ActivationDurationsController {
     /// - Returns: `true` if a duration was removed.
     @discardableResult
     public func removeActivationDuration(at index: Int) -> Bool {
-        guard canRemoveActivationDuration(at: index) else { return false }
-        let duration = activationDurations[index]
+        let durations = activationDurations
+        guard index < durations.count else { return false }
+        let duration = durations[index]
+        guard duration.seconds != 0 else { return false }
         return remove(duration)
     }
 
