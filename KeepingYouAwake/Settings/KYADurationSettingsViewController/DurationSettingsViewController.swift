@@ -42,7 +42,12 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
         }
         tableView.rowHeight = 24
         tableView.rowSizeStyle = .medium
-        tableView.usesAlternatingRowBackgroundColors = true
+        if #available(macOS 10.14, *) {
+            tableView.usesAlternatingRowBackgroundColors = false
+            tableView.backgroundColor = NSColor.alternatingContentBackgroundColors.first!
+        } else {
+            tableView.usesAlternatingRowBackgroundColors = true
+        }
         tableView.allowsMultipleSelection = false
         tableView.allowsColumnReordering = false
         tableView.allowsColumnResizing = false
@@ -208,6 +213,13 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
 
         let isDefault = durationsController.defaultActivationDuration == duration
         cell.isDefaultDuration = isDefault
+
+        if #available(macOS 10.14, *) {
+            cell.wantsLayer = true
+            cell.layer?.backgroundColor = (row % 2 == 1)
+                ? NSColor.alternatingContentBackgroundColors.last!.cgColor
+                : nil
+        }
 
         return cell
     }
