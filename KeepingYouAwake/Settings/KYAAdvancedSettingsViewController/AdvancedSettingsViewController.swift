@@ -15,6 +15,9 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
     private var tableView: NSTableView!
     private var processMonitoringCheckbox: NSButton!
     private var processNamesTextField: NSTextField!
+    private var processNamesLabel: NSTextField!
+    private var processNamesConfirmButton: NSButton!
+    private var processNamesCancelButton: NSButton!
 
     override class var tabViewItemImage: NSImage? {
         if #available(macOS 11.0, *) {
@@ -54,14 +57,20 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         scrollView.documentView = tableView
         view.addSubview(scrollView)
 
-        processMonitoringCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Activate when specified processes are running", tableName: "Localizable", bundle: .main, value: "Activate when specified processes are running", comment: "Activate when specified processes are running"), target: nil, action: nil)
+        processMonitoringCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Activate when specified processes are running", tableName: "Localizable", bundle: .main, value: "Activate when specified processes are running", comment: "Activate when specified processes are running"), target: self, action: #selector(processMonitoringCheckboxChanged(_:)))
                 processMonitoringCheckbox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processMonitoringEnabledKey)", options: [.continuouslyUpdatesValue: true])
 
-        let processNamesLabel = NSTextField(labelWithString: NSLocalizedString("Process Names:", tableName: "Localizable", bundle: .main, value: "Process Names:", comment: "Process Names:"))
+        processNamesLabel = NSTextField(labelWithString: NSLocalizedString("Process Names:", tableName: "Localizable", bundle: .main, value: "Process Names:", comment: "Process Names:"))
 
         processNamesTextField = NSTextField()
         processNamesTextField.placeholderString = NSLocalizedString("Comma-separated list of process names", tableName: "Localizable", bundle: .main, value: "Comma-separated list of process names", comment: "Comma-separated list of process names")
-                processNamesTextField.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processNamesKey)", options: [.continuouslyUpdatesValue: true])
+        processNamesTextField.stringValue = UserDefaults.standard.kya_processNames ?? ""
+
+        processNamesConfirmButton = NSButton(title: NSLocalizedString("OK", tableName: "Localizable", bundle: .main, value: "OK", comment: "Confirm process names"), target: self, action: #selector(confirmProcessNames(_:)))
+        processNamesConfirmButton.bezelStyle = .rounded
+
+        processNamesCancelButton = NSButton(title: NSLocalizedString("Cancel", tableName: "Localizable", bundle: .main, value: "Cancel", comment: "Cancel editing process names"), target: self, action: #selector(cancelProcessNames(_:)))
+        processNamesCancelButton.bezelStyle = .rounded
 
         let warningLabel = NSTextField(wrappingLabelWithString: NSLocalizedString("Only change these advanced settings if you know what you are doing. Most of these settings require an app restart.", tableName: "Localizable", bundle: .main, value: "Only change these advanced settings if you know what you are doing. Most of these settings require an app restart.", comment: "Only change these advanced settings if you know what you are doing. Most of these settings require an app restart."))
         warningLabel.font = NSFont.messageFont(ofSize: 11)
@@ -74,6 +83,8 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         view.addSubview(processMonitoringCheckbox)
         view.addSubview(processNamesLabel)
         view.addSubview(processNamesTextField)
+        view.addSubview(processNamesConfirmButton)
+        view.addSubview(processNamesCancelButton)
         view.addSubview(warningLabel)
         view.addSubview(resetButton)
 
@@ -97,6 +108,16 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         processNamesTextField.snp.makeConstraints { make in
             make.centerY.equalTo(processNamesLabel)
             make.leading.equalTo(processNamesLabel.snp.trailing).offset(8)
+        }
+
+        processNamesConfirmButton.snp.makeConstraints { make in
+            make.centerY.equalTo(processNamesLabel)
+            make.leading.equalTo(processNamesTextField.snp.trailing).offset(8)
+        }
+
+        processNamesCancelButton.snp.makeConstraints { make in
+            make.centerY.equalTo(processNamesLabel)
+            make.leading.equalTo(processNamesConfirmButton.snp.trailing).offset(4)
             make.trailing.equalTo(view).offset(-20)
         }
 
@@ -116,6 +137,7 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureAdvancedSettings()
+        updateProcessNamesRowVisibility()
     }
 
     private func configureAdvancedSettings() {
@@ -134,6 +156,33 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         UserDefaults.standard.removeObject(forKey: UserDefaults.processNamesKey)
         NSUserDefaultsController.shared.revertToInitialValues(self)
         tableView.reloadData()
+        processNamesTextField.stringValue = ""
+        updateProcessNamesRowVisibility()
+    }
+
+    @objc private func processMonitoringCheckboxChanged(_ sender: NSButton) {
+        updateProcessNamesRowVisibility()
+    }
+
+    private func updateProcessNamesRowVisibility() {
+        let isEnabled = UserDefaults.standard.kya_processMonitoringEnabled
+        if isEnabled {
+            processNamesTextField.stringValue = UserDefaults.standard.kya_processNames ?? ""
+        }
+        processNamesLabel.isHidden = !isEnabled
+        processNamesTextField.isHidden = !isEnabled
+        processNamesConfirmButton.isHidden = !isEnabled
+        processNamesCancelButton.isHidden = !isEnabled
+    }
+
+    @objc private func confirmProcessNames(_ sender: NSButton) {
+        UserDefaults.standard.kya_processNames = processNamesTextField.stringValue
+        processNamesTextField.window?.makeFirstResponder(nil)
+    }
+
+    @objc private func cancelProcessNames(_ sender: NSButton) {
+        processNamesTextField.stringValue = UserDefaults.standard.kya_processNames ?? ""
+        processNamesTextField.window?.makeFirstResponder(nil)
     }
 }
 
