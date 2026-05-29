@@ -109,26 +109,31 @@ public final class BatteryMonitor: Monitor {
     }
 
     /// Reads the first internal battery power source description from IOKit.
+    /// The dictionary returned by IOPSGetPowerSourceDescription is tied to the
+    /// blob's lifetime, so we copy it into an independent NSDictionary.
     private var powerSourceInfo: NSDictionary? {
-        guard let blobUnmanaged = IOPSCopyPowerSourcesInfo() else { return nil }
-        // blobUnmanaged is +1 from IOPSCopyPowerSourcesInfo; we manage it manually.
-        let blob = blobUnmanaged.takeRetainedValue()  // ARC owns blob now
+        guard let blob = IOPSCopyPowerSourcesInfo() else { return nil }
+        // blob is +1 from IOPSCopyPowerSourcesInfo; we'll release it ourselves.
+        let blobRef = blob.takeRetainedValue()
 
-        guard let sourcesListUnmanaged = IOPSCopyPowerSourcesList(blob) else {
+        guard let sources = IOPSCopyPowerSourcesList(blobRef) else {
             return nil
         }
-        // sourcesListUnmanaged is +1; we manage it manually.
-        let sourcesList = sourcesListUnmanaged.takeRetainedValue() as CFArray
+        let sourcesList = sources.takeRetainedValue() as CFArray
 
         guard CFArrayGetCount(sourcesList) > 0 else { return nil }
 
-        // Get the first power source ID from the array.
-        // The array contains CFTypeRef values; bridge to AnyObject for IOPS API.
         let sourceID = (sourcesList as NSArray)[0] as AnyObject
-        guard let powerSourceUnmanaged = IOPSGetPowerSourceDescription(blob, sourceID) else {
+        // IOPSGetPowerSourceDescription returns an unretained reference embedded
+        // in the blob. Use takeUnretainedValue() and copy it so it survives
+        // past the blob's lifetime.
+        guard let desc = IOPSGetPowerSourceDescription(blobRef, sourceID) else {
             return nil
         }
-        return powerSourceUnmanaged.takeRetainedValue() as NSDictionary
+        // IOPSGetPowerSourceDescription returns a reference inside the blob.
+        // Use takeUnretainedValue() and copy to make it independent of blob lifetime.
+        let result = NSDictionary(dictionary: desc.takeUnretainedValue() as! [AnyHashable: Any])
+        return result
     }
 
     deinit {
