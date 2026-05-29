@@ -9,6 +9,7 @@
 import AppKit
 import KYAActivationDurations
 import KYAApplicationSupport
+import SnapKit
 
 private let maximumHours = 999
 private let maximumMinutes = 59
@@ -47,7 +48,6 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
 
     override func loadView() {
         let mainView = NSView(frame: NSRect(x: 0, y: 0, width: 320, height: 154))
-        mainView.translatesAutoresizingMaskIntoConstraints = false
 
         let hoursGroup = makeInputGroup(label: KYAL10n.hours, maxValue: maximumHours, bindingKey: "hours")
         hoursTextField = hoursGroup.textField
@@ -62,14 +62,12 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
         secondsTextField.delegate = self
 
         let inputStack = NSStackView(views: [hoursGroup.stackView, minutesGroup.stackView, secondsGroup.stackView])
-        inputStack.translatesAutoresizingMaskIntoConstraints = false
         inputStack.orientation = .horizontal
         inputStack.alignment = .top
         inputStack.distribution = .fillEqually
         inputStack.spacing = 8
 
         warningLabel = NSTextField(labelWithString: "")
-        warningLabel.translatesAutoresizingMaskIntoConstraints = false
         warningLabel.alignment = .center
         warningLabel.textColor = .secondaryLabelColor
         warningLabel.preferredMaxLayoutWidth = 280
@@ -77,27 +75,22 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
         bindWarningLabel()
 
         let warningContainer = NSView()
-        warningContainer.translatesAutoresizingMaskIntoConstraints = false
         warningContainer.addSubview(warningLabel)
-        NSLayoutConstraint.activate([
-            warningLabel.leadingAnchor.constraint(equalTo: warningContainer.leadingAnchor),
-            warningLabel.trailingAnchor.constraint(equalTo: warningContainer.trailingAnchor),
-            warningLabel.topAnchor.constraint(greaterThanOrEqualTo: warningContainer.topAnchor, constant: 8),
-            warningLabel.bottomAnchor.constraint(equalTo: warningContainer.bottomAnchor, constant: -8),
-        ])
+        warningLabel.snp.makeConstraints { make in
+            make.leading.trailing.equalTo(warningContainer)
+            make.top.greaterThanOrEqualTo(warningContainer).offset(8)
+            make.bottom.equalTo(warningContainer).offset(-8)
+        }
 
         let cancelButton = NSButton(title: KYAL10n.cancel, target: self, action: #selector(cancelAction))
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.bezelStyle = .rounded
         cancelButton.keyEquivalent = "\u{1b}"
 
         addButton = NSButton(title: KYAL10n.addDuration, target: self, action: #selector(addDuration(_:)))
-        addButton.translatesAutoresizingMaskIntoConstraints = false
         addButton.bezelStyle = .rounded
         addButton.keyEquivalent = "\r"
 
         let buttonStack = NSStackView(views: [cancelButton, addButton])
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
         buttonStack.orientation = .horizontal
         buttonStack.alignment = .top
         buttonStack.distribution = .equalSpacing
@@ -106,20 +99,24 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
         mainView.addSubview(warningContainer)
         mainView.addSubview(buttonStack)
 
-        NSLayoutConstraint.activate([
-            inputStack.topAnchor.constraint(equalTo: mainView.topAnchor, constant: 20),
-            inputStack.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 20),
-            inputStack.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -20),
+        inputStack.snp.makeConstraints { make in
+            make.top.equalTo(mainView).offset(20)
+            make.leading.equalTo(mainView).offset(20)
+            make.trailing.equalTo(mainView).offset(-20)
+        }
 
-            warningContainer.topAnchor.constraint(equalTo: inputStack.bottomAnchor, constant: 8),
-            warningContainer.leadingAnchor.constraint(equalTo: mainView.leadingAnchor, constant: 20),
-            warningContainer.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -20),
+        warningContainer.snp.makeConstraints { make in
+            make.top.equalTo(inputStack.snp.bottom).offset(8)
+            make.leading.equalTo(mainView).offset(20)
+            make.trailing.equalTo(mainView).offset(-20)
+        }
 
-            buttonStack.topAnchor.constraint(equalTo: warningContainer.bottomAnchor, constant: 8),
-            buttonStack.trailingAnchor.constraint(equalTo: mainView.trailingAnchor, constant: -20),
-            buttonStack.leadingAnchor.constraint(greaterThanOrEqualTo: mainView.leadingAnchor, constant: 20),
-            buttonStack.bottomAnchor.constraint(equalTo: mainView.bottomAnchor, constant: -20),
-        ])
+        buttonStack.snp.makeConstraints { make in
+            make.top.equalTo(warningContainer.snp.bottom).offset(8)
+            make.trailing.equalTo(mainView).offset(-20)
+            make.leading.greaterThanOrEqualTo(mainView).offset(20)
+            make.bottom.equalTo(mainView).offset(-20)
+        }
 
         bindTextFields()
 
@@ -252,7 +249,6 @@ final class AddDurationViewController: NSViewController, NSTextFieldDelegate {
 
         let textField = NSTextField()
         textField.formatter = formatter
-        textField.translatesAutoresizingMaskIntoConstraints = false
         textField.alignment = .right
         textField.bezelStyle = .roundedBezel
 

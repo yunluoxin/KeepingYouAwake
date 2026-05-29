@@ -9,6 +9,7 @@
 import AppKit
 import KYADeviceInfo
 import KYAApplicationSupport
+import SnapKit
 
 class BatterySettingsViewController: SettingsContentViewController {
 
@@ -134,10 +135,8 @@ class BatterySettingsViewController: SettingsContentViewController {
 
     private func makeSliderContainer() -> NSView {
         let container = NSView()
-        container.translatesAutoresizingMaskIntoConstraints = false
 
         batteryThresholdSlider = NSSlider()
-        batteryThresholdSlider.translatesAutoresizingMaskIntoConstraints = false
         batteryThresholdSlider.minValue = 10
         batteryThresholdSlider.maxValue = 90
         batteryThresholdSlider.intValue = 50
@@ -150,38 +149,40 @@ class BatterySettingsViewController: SettingsContentViewController {
         container.addSubview(batteryThresholdSlider)
 
         let tickContainer = NSView()
-        tickContainer.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(tickContainer)
 
         let label10 = makeMiniLabel(NSLocalizedString("10 %", comment: "10 %"))
         let label50 = makeMiniLabel(NSLocalizedString("50 %", comment: "50 %"))
         let label90 = makeMiniLabel(NSLocalizedString("90 %", comment: "90 %"))
 
-        label10.translatesAutoresizingMaskIntoConstraints = false
-        label50.translatesAutoresizingMaskIntoConstraints = false
-        label90.translatesAutoresizingMaskIntoConstraints = false
-
         tickContainer.addSubview(label10)
         tickContainer.addSubview(label50)
         tickContainer.addSubview(label90)
 
-        NSLayoutConstraint.activate([
-            batteryThresholdSlider.topAnchor.constraint(equalTo: container.topAnchor),
-            batteryThresholdSlider.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            batteryThresholdSlider.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+        batteryThresholdSlider.snp.makeConstraints { make in
+            make.top.leading.trailing.equalTo(container)
+        }
 
-            tickContainer.topAnchor.constraint(equalTo: batteryThresholdSlider.bottomAnchor, constant: 4),
-            tickContainer.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            tickContainer.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            tickContainer.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+        tickContainer.snp.makeConstraints { make in
+            make.top.equalTo(batteryThresholdSlider.snp.bottom).offset(4)
+            make.leading.trailing.equalTo(container)
+            make.bottom.equalTo(container)
+        }
 
-            label10.leadingAnchor.constraint(equalTo: tickContainer.leadingAnchor),
-            label10.centerYAnchor.constraint(equalTo: tickContainer.centerYAnchor),
-            label50.centerXAnchor.constraint(equalTo: tickContainer.centerXAnchor),
-            label50.centerYAnchor.constraint(equalTo: tickContainer.centerYAnchor),
-            label90.trailingAnchor.constraint(equalTo: tickContainer.trailingAnchor),
-            label90.centerYAnchor.constraint(equalTo: tickContainer.centerYAnchor),
-        ])
+        label10.snp.makeConstraints { make in
+            make.leading.equalTo(tickContainer)
+            make.centerY.equalTo(tickContainer)
+        }
+
+        label50.snp.makeConstraints { make in
+            make.centerX.equalTo(tickContainer)
+            make.centerY.equalTo(tickContainer)
+        }
+
+        label90.snp.makeConstraints { make in
+            make.trailing.equalTo(tickContainer)
+            make.centerY.equalTo(tickContainer)
+        }
 
         return container
     }

@@ -9,6 +9,7 @@
 import AppKit
 import KYAApplicationSupport
 import KYAUserNotifications
+import SnapKit
 
 final class GeneralSettingsViewController: SettingsContentViewController {
     override class var tabViewItemImage: NSImage? {
@@ -68,37 +69,40 @@ final class GeneralSettingsViewController: SettingsContentViewController {
         contentStack.addView(startAtLoginGroup, in: .top)
         contentStack.addView(activateOnLaunchGroup, in: .top)
         contentStack.addView(notificationSettingsButton, in: .top)
-        contentStack.translatesAutoresizingMaskIntoConstraints = false
-        contentStack.widthAnchor.constraint(greaterThanOrEqualToConstant: 350).isActive = true
+        contentStack.snp.makeConstraints { make in
+            make.width.greaterThanOrEqualTo(350)
+        }
 
         let separator = NSBox()
         separator.boxType = .separator
-        separator.translatesAutoresizingMaskIntoConstraints = false
 
         let quitButton = NSButton(title: NSLocalizedString("Quit", tableName: "KYAGeneralSettingsViewController", bundle: .main, value: "Quit", comment: "Class = \"NSButtonCell\"; title = \"Quit\"; ObjectID = \"IGL-ft-k8h\";"), target: NSApplication.shared, action: #selector(NSApplication.terminate))
         quitButton.bezelStyle = .rounded
         quitButton.keyEquivalent = "q"
         quitButton.keyEquivalentModifierMask = .command
-        quitButton.translatesAutoresizingMaskIntoConstraints = false
 
         let containerView = NSView()
         containerView.addSubview(contentStack)
         containerView.addSubview(separator)
         containerView.addSubview(quitButton)
 
-        NSLayoutConstraint.activate([
-            contentStack.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
-            contentStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 80),
-            contentStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+        contentStack.snp.makeConstraints { make in
+            make.top.equalTo(containerView).offset(20)
+            make.leading.equalTo(containerView).offset(80)
+            make.trailing.equalTo(containerView).offset(-20)
+        }
 
-            separator.topAnchor.constraint(equalTo: contentStack.bottomAnchor, constant: 16),
-            separator.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
-            separator.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+        separator.snp.makeConstraints { make in
+            make.top.equalTo(contentStack.snp.bottom).offset(16)
+            make.leading.equalTo(containerView).offset(20)
+            make.trailing.equalTo(containerView).offset(-20)
+        }
 
-            quitButton.topAnchor.constraint(greaterThanOrEqualTo: separator.bottomAnchor, constant: 16),
-            quitButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -20),
-            quitButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
-        ])
+        quitButton.snp.makeConstraints { make in
+            make.top.greaterThanOrEqualTo(separator.snp.bottom).offset(16)
+            make.bottom.equalTo(containerView).offset(-20)
+            make.trailing.equalTo(containerView).offset(-20)
+        }
 
         view = containerView
     }

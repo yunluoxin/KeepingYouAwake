@@ -8,6 +8,7 @@
 
 import AppKit
 import KYAApplicationSupport
+import SnapKit
 
 final class AdvancedSettingsViewController: SettingsContentViewController {
     private var settings: [UserDefaultsSetting] = []
@@ -33,7 +34,6 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         scrollView.hasHorizontalScroller = false
         scrollView.hasVerticalScroller = true
         scrollView.autohidesScrollers = true
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
 
         tableView = NSTableView()
         if #available(macOS 11.0, *) {
@@ -55,26 +55,21 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         view.addSubview(scrollView)
 
         processMonitoringCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Activate when specified processes are running", tableName: "Localizable", bundle: .main, value: "Activate when specified processes are running", comment: "Activate when specified processes are running"), target: nil, action: nil)
-        processMonitoringCheckbox.translatesAutoresizingMaskIntoConstraints = false
-        processMonitoringCheckbox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processMonitoringEnabledKey)", options: [.continuouslyUpdatesValue: true])
+                processMonitoringCheckbox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processMonitoringEnabledKey)", options: [.continuouslyUpdatesValue: true])
 
         let processNamesLabel = NSTextField(labelWithString: NSLocalizedString("Process Names:", tableName: "Localizable", bundle: .main, value: "Process Names:", comment: "Process Names:"))
-        processNamesLabel.translatesAutoresizingMaskIntoConstraints = false
 
         processNamesTextField = NSTextField()
         processNamesTextField.placeholderString = NSLocalizedString("Comma-separated list of process names", tableName: "Localizable", bundle: .main, value: "Comma-separated list of process names", comment: "Comma-separated list of process names")
-        processNamesTextField.translatesAutoresizingMaskIntoConstraints = false
-        processNamesTextField.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processNamesKey)", options: [.continuouslyUpdatesValue: true])
+                processNamesTextField.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processNamesKey)", options: [.continuouslyUpdatesValue: true])
 
         let warningLabel = NSTextField(wrappingLabelWithString: NSLocalizedString("Only change these advanced settings if you know what you are doing. Most of these settings require an app restart.", tableName: "Localizable", bundle: .main, value: "Only change these advanced settings if you know what you are doing. Most of these settings require an app restart.", comment: "Only change these advanced settings if you know what you are doing. Most of these settings require an app restart."))
         warningLabel.font = NSFont.messageFont(ofSize: 11)
         warningLabel.textColor = .secondaryLabelColor
-        warningLabel.translatesAutoresizingMaskIntoConstraints = false
-        warningLabel.preferredMaxLayoutWidth = 272
+                warningLabel.preferredMaxLayoutWidth = 272
 
         let resetButton = NSButton(title: NSLocalizedString("Reset to Default", tableName: "Localizable", bundle: .main, value: "Reset to Default", comment: "Reset to Default"), target: self, action: #selector(resetAdvancedSettings))
         resetButton.bezelStyle = .rounded
-        resetButton.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(processMonitoringCheckbox)
         view.addSubview(processNamesLabel)
@@ -82,30 +77,40 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         view.addSubview(warningLabel)
         view.addSubview(resetButton)
 
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: -1),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: -1),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 1),
-            scrollView.heightAnchor.constraint(equalToConstant: 160),
+        scrollView.snp.makeConstraints { make in
+            make.top.equalTo(view).offset(-1)
+            make.leading.equalTo(view).offset(-1)
+            make.trailing.equalTo(view).offset(1)
+            make.height.equalTo(160)
+        }
 
-            processMonitoringCheckbox.topAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: 12),
-            processMonitoringCheckbox.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+        processMonitoringCheckbox.snp.makeConstraints { make in
+            make.top.equalTo(scrollView.snp.bottom).offset(12)
+            make.leading.equalTo(view).offset(20)
+        }
 
-            processNamesLabel.topAnchor.constraint(equalTo: processMonitoringCheckbox.bottomAnchor, constant: 8),
-            processNamesLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+        processNamesLabel.snp.makeConstraints { make in
+            make.top.equalTo(processMonitoringCheckbox.snp.bottom).offset(8)
+            make.leading.equalTo(view).offset(20)
+        }
 
-            processNamesTextField.centerYAnchor.constraint(equalTo: processNamesLabel.centerYAnchor),
-            processNamesTextField.leadingAnchor.constraint(equalTo: processNamesLabel.trailingAnchor, constant: 8),
-            processNamesTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+        processNamesTextField.snp.makeConstraints { make in
+            make.centerY.equalTo(processNamesLabel)
+            make.leading.equalTo(processNamesLabel.snp.trailing).offset(8)
+            make.trailing.equalTo(view).offset(-20)
+        }
 
-            warningLabel.topAnchor.constraint(equalTo: processNamesLabel.bottomAnchor, constant: 12),
-            warningLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            warningLabel.trailingAnchor.constraint(lessThanOrEqualTo: resetButton.leadingAnchor, constant: -16),
+        warningLabel.snp.makeConstraints { make in
+            make.top.equalTo(processNamesLabel.snp.bottom).offset(12)
+            make.leading.equalTo(view).offset(20)
+            make.trailing.lessThanOrEqualTo(resetButton.snp.leading).offset(-16)
+        }
 
-            resetButton.lastBaselineAnchor.constraint(equalTo: warningLabel.lastBaselineAnchor),
-            resetButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            resetButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -20),
-        ])
+        resetButton.snp.makeConstraints { make in
+            make.lastBaseline.equalTo(warningLabel)
+            make.trailing.equalTo(view).offset(-20)
+            make.bottom.equalTo(view).offset(-20)
+        }
     }
 
     override func viewDidLoad() {
@@ -168,15 +173,14 @@ private final class SettingCellView: NSTableCellView {
 
     init() {
         super.init(frame: .zero)
-        checkbox.translatesAutoresizingMaskIntoConstraints = false
         addSubview(checkbox)
 
-        NSLayoutConstraint.activate([
-            checkbox.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            checkbox.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            checkbox.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-            checkbox.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -8),
-        ])
+        checkbox.snp.makeConstraints { make in
+            make.leading.equalTo(self).offset(8)
+            make.top.equalTo(self).offset(8)
+            make.bottom.equalTo(self).offset(-8)
+            make.trailing.lessThanOrEqualTo(self).offset(-8)
+        }
     }
 
     @available(*, unavailable)

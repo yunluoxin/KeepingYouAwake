@@ -10,6 +10,7 @@
 
 import AppKit
 import KYAApplicationSupport
+import SnapKit
 
 final class UpdateSettingsViewController: SettingsContentViewController {
     override class var tabViewItemImage: NSImage? {
@@ -56,9 +57,9 @@ final class UpdateSettingsViewController: SettingsContentViewController {
         imageView.isEditable = false
         imageView.setContentHuggingPriority(.defaultLow, for: .horizontal)
         imageView.setContentHuggingPriority(.defaultLow, for: .vertical)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.widthAnchor.constraint(equalToConstant: 96).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 96).isActive = true
+        imageView.snp.makeConstraints { make in
+            make.width.height.equalTo(96)
+        }
         return imageView
     }()
 
@@ -67,8 +68,9 @@ final class UpdateSettingsViewController: SettingsContentViewController {
         box.boxType = .primary
         box.titlePosition = .noTitle
         box.contentView = contentStackView
-        box.translatesAutoresizingMaskIntoConstraints = false
-        box.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        box.snp.makeConstraints { make in
+            make.height.equalTo(150)
+        }
         return box
     }()
 
@@ -85,21 +87,22 @@ final class UpdateSettingsViewController: SettingsContentViewController {
 
     override func loadView() {
         let container = NSView()
-        container.translatesAutoresizingMaskIntoConstraints = false
 
         container.addSubview(iconImageView)
         container.addSubview(contentBox)
 
-        NSLayoutConstraint.activate([
-            iconImageView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
-            iconImageView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            iconImageView.topAnchor.constraint(greaterThanOrEqualTo: container.topAnchor, constant: 20),
+        iconImageView.snp.makeConstraints { make in
+            make.leading.equalTo(container).offset(20)
+            make.centerY.equalTo(container)
+            make.top.greaterThanOrEqualTo(container).offset(20)
+        }
 
-            contentBox.topAnchor.constraint(equalTo: container.topAnchor, constant: -2),
-            contentBox.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -2),
-            contentBox.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -2),
-            contentBox.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 20),
-        ])
+        contentBox.snp.makeConstraints { make in
+            make.top.equalTo(container).offset(-2)
+            make.bottom.equalTo(container).offset(-2)
+            make.trailing.equalTo(container).offset(-2)
+            make.leading.equalTo(iconImageView.snp.trailing).offset(20)
+        }
 
         view = container
     }

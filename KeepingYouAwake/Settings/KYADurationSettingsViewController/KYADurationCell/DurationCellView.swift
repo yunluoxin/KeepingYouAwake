@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import SnapKit
 
 final class DurationCellView: NSTableCellView {
     let textLabel: NSTextField
@@ -42,29 +43,29 @@ final class DurationCellView: NSTableCellView {
 
         super.init(frame: frameRect)
 
-        textLabel.translatesAutoresizingMaskIntoConstraints = false
         textLabel.lineBreakMode = .byClipping
         textLabel.textColor = .labelColor
-        textLabel.setContentHuggingPriority(NSLayoutConstraint.Priority(300), for: .horizontal)
+        textLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
-        defaultLabel.translatesAutoresizingMaskIntoConstraints = false
         defaultLabel.lineBreakMode = .byClipping
         defaultLabel.textColor = .secondaryLabelColor
         defaultLabel.isHidden = true
-        defaultLabel.setContentHuggingPriority(NSLayoutConstraint.Priority(800), for: .horizontal)
+        defaultLabel.setContentHuggingPriority(.required, for: .horizontal)
 
         addSubview(textLabel)
         addSubview(defaultLabel)
 
-        NSLayoutConstraint.activate([
-            textLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            textLabel.topAnchor.constraint(equalTo: topAnchor, constant: 3),
-            bottomAnchor.constraint(equalTo: textLabel.bottomAnchor, constant: 4),
+        textLabel.snp.makeConstraints { make in
+            make.leading.equalTo(self).offset(8)
+            make.top.equalTo(self).offset(3)
+            make.bottom.equalTo(self.snp.bottom).offset(-4)
+        }
 
-            defaultLabel.leadingAnchor.constraint(equalTo: textLabel.trailingAnchor, constant: 8),
-            defaultLabel.firstBaselineAnchor.constraint(equalTo: textLabel.firstBaselineAnchor),
-            trailingAnchor.constraint(equalTo: defaultLabel.trailingAnchor, constant: 8),
-        ])
+        defaultLabel.snp.makeConstraints { make in
+            make.leading.equalTo(textLabel.snp.trailing).offset(8)
+            make.firstBaseline.equalTo(textLabel)
+            make.trailing.equalTo(self).offset(-8)
+        }
     }
 
     @available(*, unavailable)

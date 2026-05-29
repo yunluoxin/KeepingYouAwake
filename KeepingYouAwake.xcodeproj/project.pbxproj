@@ -466,6 +466,7 @@
 				DA52096F27C6CBC000ECFDA6 /* KYASleepWakeTimer */,
 				DA814382281D59970004BE71 /* KYAStatusItemUI */,
 				DA51CA682BB75A120013175E /* KYACommon */,
+				DAC12D8CEDD0D7E4CCD8 /* SnapKit */,
 			);
 			productName = KeepingYouAwake;
 			productReference = DA637B3919F14693004C8838 /* KeepingYouAwake.app */;
@@ -514,6 +515,7 @@
 				DA52097127C6CBC500ECFDA6 /* KYASleepWakeTimer */,
 				DA814384281D599D0004BE71 /* KYAStatusItemUI */,
 				DA51CA662BB75A0B0013175E /* KYACommon */,
+				DA02E6D9D8FAB1E356FEC /* SnapKit */,
 			);
 			productName = KeepingYouAwake;
 			productReference = DAD3CF8F271186720006CA14 /* KeepingYouAwake.app */;
@@ -584,6 +586,7 @@
 			mainGroup = DA637B3019F14693004C8838;
 			packageReferences = (
 				DAEF160A277C67D800EA9478 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				DA9C64DFF9766F88EA9478 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			productRefGroup = DA637B3A19F14693004C8838 /* Products */;
 			projectDirPath = "";
@@ -1084,6 +1087,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		DA9C64DFF9766F88EA9478 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1156,6 +1167,16 @@
 			package = DAEF160A277C67D800EA9478 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
 		};
+			DAC12D8CEDD0D7E4CCD8 /* SnapKit */ = {
+				isa = XCSwiftPackageProductDependency;
+				package = DA9C64DFF9766F88EA9478 /* XCRemoteSwiftPackageReference "SnapKit" */;
+				productName = SnapKit;
+			};
+			DA02E6D9D8FAB1E356FEC /* SnapKit */ = {
+				isa = XCSwiftPackageProductDependency;
+				package = DA9C64DFF9766F88EA9478 /* XCRemoteSwiftPackageReference "SnapKit" */;
+				productName = SnapKit;
+			};
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DA637B3119F14693004C8838 /* Project object */;

@@ -10,6 +10,7 @@
 
 import AppKit
 import KYAApplicationSupport
+import SnapKit
 
 /// About settings tab — shows version, copyright, and Credits.rtf.
 final class AboutSettingsViewController: SettingsContentViewController {
@@ -68,9 +69,9 @@ final class AboutSettingsViewController: SettingsContentViewController {
         stackView.addArrangedSubview(creditsScrollView)
 
         // Let credits stretch vertically; labels stay at natural height
-        NSLayoutConstraint.activate([
-            creditsScrollView.heightAnchor.constraint(greaterThanOrEqualToConstant: 100),
-        ])
+        creditsScrollView.snp.makeConstraints { make in
+            make.height.greaterThanOrEqualTo(100)
+        }
 
         view = stackView
     }
