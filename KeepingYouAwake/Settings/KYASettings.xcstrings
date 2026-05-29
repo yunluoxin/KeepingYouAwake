@@ -388,6 +388,9 @@
         }
       }
     },
+    "Automatically Check for Updates" : {
+      "comment" : "Automatically Check for Updates"
+    },
     "Battery" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -524,6 +527,12 @@
           }
         }
       }
+    },
+    "Check for Pre-Release Updates" : {
+      "comment" : "Check for Pre-Release Updates"
+    },
+    "Check Now" : {
+      "comment" : "Check Now"
     },
     "General" : {
       "extractionState" : "manual",

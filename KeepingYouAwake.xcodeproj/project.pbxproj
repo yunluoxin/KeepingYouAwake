@@ -3,44 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DA085D1021D6BAB6003D9B1B /* container-migration.plist in Resources */ = {isa = PBXBuildFile; fileRef = DA085D0F21D6BAB6003D9B1B /* container-migration.plist */; };
-		DA13771A25E969FF00FB0FAD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA13771925E969FF00FB0FAD /* Assets.xcassets */; };
-		DA25063027C2486D0052CCD8 /* KYADeviceInfo in Frameworks */ = {isa = PBXBuildFile; productRef = DA25062F27C2486D0052CCD8 /* KYADeviceInfo */; };
-		DA25063227C248710052CCD8 /* KYADeviceInfo in Frameworks */ = {isa = PBXBuildFile; productRef = DA25063127C248710052CCD8 /* KYADeviceInfo */; };
-		DA4F7F472A3F218D00C7C076 /* KYASettings.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F462A3F218D00C7C076 /* KYASettings.xcstrings */; };
-		DA4F7F482A3F218D00C7C076 /* KYASettings.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F462A3F218D00C7C076 /* KYASettings.xcstrings */; };
-		DA4F7F512A3F21E100C7C076 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F502A3F21E100C7C076 /* Localizable.xcstrings */; };
-		DA4F7F522A3F21E100C7C076 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F502A3F21E100C7C076 /* Localizable.xcstrings */; };
-		DA51CA672BB75A0B0013175E /* KYACommon in Frameworks */ = {isa = PBXBuildFile; productRef = DA51CA662BB75A0B0013175E /* KYACommon */; };
-		DA51CA692BB75A120013175E /* KYACommon in Frameworks */ = {isa = PBXBuildFile; productRef = DA51CA682BB75A120013175E /* KYACommon */; };
-		DA52096627C6C56A00ECFDA6 /* KYAActivationDurations in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096527C6C56A00ECFDA6 /* KYAActivationDurations */; };
-		DA52096827C6C56F00ECFDA6 /* KYAActivationDurations in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096727C6C56F00ECFDA6 /* KYAActivationDurations */; };
-		DA52096A27C6C9B900ECFDA6 /* KYAApplicationSupport in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096927C6C9B900ECFDA6 /* KYAApplicationSupport */; };
-		DA52096C27C6C9BD00ECFDA6 /* KYAApplicationSupport in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096B27C6C9BD00ECFDA6 /* KYAApplicationSupport */; };
-		DA52097027C6CBC000ECFDA6 /* KYASleepWakeTimer in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096F27C6CBC000ECFDA6 /* KYASleepWakeTimer */; };
-		DA52097227C6CBC500ECFDA6 /* KYASleepWakeTimer in Frameworks */ = {isa = PBXBuildFile; productRef = DA52097127C6CBC500ECFDA6 /* KYASleepWakeTimer */; };
-		FA00000300000000000003 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000300000000000001 /* AppDelegate.swift */; };
-		FA00000300000000000004 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000300000000000002 /* main.swift */; };
-		DA658E8421CE93310049F4C1 /* KeepingYouAwake Launcher.app in Embed Launcher */ = {isa = PBXBuildFile; fileRef = DA658E6B21CE907B0049F4C1 /* KeepingYouAwake Launcher.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		DA814383281D59970004BE71 /* KYAStatusItemUI in Frameworks */ = {isa = PBXBuildFile; productRef = DA814382281D59970004BE71 /* KYAStatusItemUI */; };
-		DA814385281D599D0004BE71 /* KYAStatusItemUI in Frameworks */ = {isa = PBXBuildFile; productRef = DA814384281D599D0004BE71 /* KYAStatusItemUI */; };
-		DA898C6F2A3EEE460005A48A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DA898C6E2A3EEE460005A48A /* Credits.rtf */; };
-		DA898C702A3EEE460005A48A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DA898C6E2A3EEE460005A48A /* Credits.rtf */; };
-		DA8AF45F2E50594C00EBD156 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA8AF45E2E50594C00EBD156 /* AppIcon.icon */; };
-		DA99FF682E2ACF49003B3E09 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA99FF672E2ACF49003B3E09 /* AppIcon.icon */; };
-		DA99FF692E2ACF49003B3E09 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA99FF672E2ACF49003B3E09 /* AppIcon.icon */; };
-		DACF2FC727C2657800856FEC /* KYAUserNotifications in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FC627C2657800856FEC /* KYAUserNotifications */; };
-		DACF2FC927C2657C00856FEC /* KYAUserNotifications in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FC827C2657C00856FEC /* KYAUserNotifications */; };
-		DACF2FCB27C271B600856FEC /* KYAApplicationEvents in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FCA27C271B600856FEC /* KYAApplicationEvents */; };
-		DACF2FCD27C271BA00856FEC /* KYAApplicationEvents in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FCC27C271BA00856FEC /* KYAApplicationEvents */; };
-		DAD3CF7A271186720006CA14 /* container-migration.plist in Resources */ = {isa = PBXBuildFile; fileRef = DA085D0F21D6BAB6003D9B1B /* container-migration.plist */; };
-		DAD3CF7C271186720006CA14 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA13771925E969FF00FB0FAD /* Assets.xcassets */; };
-		DAD3CF86271186720006CA14 /* KeepingYouAwake Launcher.app in Embed Launcher */ = {isa = PBXBuildFile; fileRef = DA658E6B21CE907B0049F4C1 /* KeepingYouAwake Launcher.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		DAEF160C277C67D800EA9478 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = DAEF160B277C67D800EA9478 /* Sparkle */; };
 		00FA00000100000000000002 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000001 /* AppMain.swift */; };
 		00FA00000100000000000004 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000003 /* AppDelegate.swift */; };
 		00FA00000100000000000006 /* AppController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000005 /* AppController.swift */; };
@@ -63,6 +29,38 @@
 		00FA00000100000000000028 /* DurationCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000027 /* DurationCellView.swift */; };
 		00FA0000010000000000002A /* AboutSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000029 /* AboutSettingsViewController.swift */; };
 		00FA0000010000000000002C /* UpdateSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA0000010000000000002B /* UpdateSettingsViewController.swift */; };
+		DA085D1021D6BAB6003D9B1B /* (null) in Resources */ = {isa = PBXBuildFile; };
+		DA13771A25E969FF00FB0FAD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA13771925E969FF00FB0FAD /* Assets.xcassets */; };
+		DA25063027C2486D0052CCD8 /* KYADeviceInfo in Frameworks */ = {isa = PBXBuildFile; productRef = DA25062F27C2486D0052CCD8 /* KYADeviceInfo */; };
+		DA25063227C248710052CCD8 /* KYADeviceInfo in Frameworks */ = {isa = PBXBuildFile; productRef = DA25063127C248710052CCD8 /* KYADeviceInfo */; };
+		DA4F7F472A3F218D00C7C076 /* KYASettings.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F462A3F218D00C7C076 /* KYASettings.xcstrings */; };
+		DA4F7F482A3F218D00C7C076 /* KYASettings.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F462A3F218D00C7C076 /* KYASettings.xcstrings */; };
+		DA4F7F512A3F21E100C7C076 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F502A3F21E100C7C076 /* Localizable.xcstrings */; };
+		DA4F7F522A3F21E100C7C076 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DA4F7F502A3F21E100C7C076 /* Localizable.xcstrings */; };
+		DA51CA672BB75A0B0013175E /* KYACommon in Frameworks */ = {isa = PBXBuildFile; productRef = DA51CA662BB75A0B0013175E /* KYACommon */; };
+		DA51CA692BB75A120013175E /* KYACommon in Frameworks */ = {isa = PBXBuildFile; productRef = DA51CA682BB75A120013175E /* KYACommon */; };
+		DA52096627C6C56A00ECFDA6 /* KYAActivationDurations in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096527C6C56A00ECFDA6 /* KYAActivationDurations */; };
+		DA52096827C6C56F00ECFDA6 /* KYAActivationDurations in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096727C6C56F00ECFDA6 /* KYAActivationDurations */; };
+		DA52096A27C6C9B900ECFDA6 /* KYAApplicationSupport in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096927C6C9B900ECFDA6 /* KYAApplicationSupport */; };
+		DA52096C27C6C9BD00ECFDA6 /* KYAApplicationSupport in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096B27C6C9BD00ECFDA6 /* KYAApplicationSupport */; };
+		DA52097027C6CBC000ECFDA6 /* KYASleepWakeTimer in Frameworks */ = {isa = PBXBuildFile; productRef = DA52096F27C6CBC000ECFDA6 /* KYASleepWakeTimer */; };
+		DA52097227C6CBC500ECFDA6 /* KYASleepWakeTimer in Frameworks */ = {isa = PBXBuildFile; productRef = DA52097127C6CBC500ECFDA6 /* KYASleepWakeTimer */; };
+		DA658E8421CE93310049F4C1 /* KeepingYouAwake Launcher.app in Embed Launcher */ = {isa = PBXBuildFile; fileRef = DA658E6B21CE907B0049F4C1 /* KeepingYouAwake Launcher.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DA814383281D59970004BE71 /* KYAStatusItemUI in Frameworks */ = {isa = PBXBuildFile; productRef = DA814382281D59970004BE71 /* KYAStatusItemUI */; };
+		DA814385281D599D0004BE71 /* KYAStatusItemUI in Frameworks */ = {isa = PBXBuildFile; productRef = DA814384281D599D0004BE71 /* KYAStatusItemUI */; };
+		DA898C6F2A3EEE460005A48A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DA898C6E2A3EEE460005A48A /* Credits.rtf */; };
+		DA898C702A3EEE460005A48A /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DA898C6E2A3EEE460005A48A /* Credits.rtf */; };
+		DA8AF45F2E50594C00EBD156 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA8AF45E2E50594C00EBD156 /* AppIcon.icon */; };
+		DA99FF682E2ACF49003B3E09 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA99FF672E2ACF49003B3E09 /* AppIcon.icon */; };
+		DA99FF692E2ACF49003B3E09 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DA99FF672E2ACF49003B3E09 /* AppIcon.icon */; };
+		DACF2FC727C2657800856FEC /* KYAUserNotifications in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FC627C2657800856FEC /* KYAUserNotifications */; };
+		DACF2FC927C2657C00856FEC /* KYAUserNotifications in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FC827C2657C00856FEC /* KYAUserNotifications */; };
+		DACF2FCB27C271B600856FEC /* KYAApplicationEvents in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FCA27C271B600856FEC /* KYAApplicationEvents */; };
+		DACF2FCD27C271BA00856FEC /* KYAApplicationEvents in Frameworks */ = {isa = PBXBuildFile; productRef = DACF2FCC27C271BA00856FEC /* KYAApplicationEvents */; };
+		DAD3CF7A271186720006CA14 /* (null) in Resources */ = {isa = PBXBuildFile; };
+		DAD3CF7C271186720006CA14 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA13771925E969FF00FB0FAD /* Assets.xcassets */; };
+		DAD3CF86271186720006CA14 /* KeepingYouAwake Launcher.app in Embed Launcher */ = {isa = PBXBuildFile; fileRef = DA658E6B21CE907B0049F4C1 /* KeepingYouAwake Launcher.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DAEF160C277C67D800EA9478 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = DAEF160B277C67D800EA9478 /* Sparkle */; };
 		FA0000020001000000000001 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000001 /* AppMain.swift */; };
 		FA0000020002000000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000003 /* AppDelegate.swift */; };
 		FA0000020003000000000003 /* AppController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000005 /* AppController.swift */; };
@@ -85,6 +83,8 @@
 		FA0000020020000000000020 /* DurationCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000027 /* DurationCellView.swift */; };
 		FA0000020021000000000021 /* AboutSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000029 /* AboutSettingsViewController.swift */; };
 		FA0000020022000000000022 /* UpdateSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA0000010000000000002B /* UpdateSettingsViewController.swift */; };
+		FA00000300000000000003 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000300000000000001 /* AppDelegate.swift */; };
+		FA00000300000000000004 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA00000300000000000002 /* main.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,23 +150,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		DA13771925E969FF00FB0FAD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DA2D55152A3B80FB003E09E3 /* DefaultTestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DefaultTestPlan.xctestplan; sourceTree = "<group>"; };
-		DA2D55162A3B8379003E09E3 /* SanitizerTestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SanitizerTestPlan.xctestplan; sourceTree = "<group>"; };
-		DA4F7F462A3F218D00C7C076 /* KYASettings.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = KYASettings.xcstrings; sourceTree = "<group>"; };
-		DA4F7F502A3F21E100C7C076 /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		DA637B3919F14693004C8838 /* KeepingYouAwake.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeepingYouAwake.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA637B3D19F14693004C8838 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA658E6B21CE907B0049F4C1 /* KeepingYouAwake Launcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KeepingYouAwake Launcher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA658E7521CE907D0049F4C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA658E7821CE907D0049F4C1 /* KYALauncher.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KYALauncher.entitlements; sourceTree = "<group>"; };
-		FA00000300000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		FA00000300000000000002 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		DA898C6E2A3EEE460005A48A /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = SOURCE_ROOT; };
-		DA8AF45E2E50594C00EBD156 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
-		DA99FF672E2ACF49003B3E09 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
-		DAD3CF8F271186720006CA14 /* KeepingYouAwake.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeepingYouAwake.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DAE9C00D26107E1A00F9ED76 /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configuration.xcconfig; sourceTree = SOURCE_ROOT; };
 		00FA00000100000000000001 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
 		00FA00000100000000000003 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		00FA00000100000000000005 /* AppController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppController.swift; sourceTree = "<group>"; };
@@ -189,6 +172,23 @@
 		00FA00000100000000000027 /* DurationCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationCellView.swift; sourceTree = "<group>"; };
 		00FA00000100000000000029 /* AboutSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettingsViewController.swift; sourceTree = "<group>"; };
 		00FA0000010000000000002B /* UpdateSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateSettingsViewController.swift; sourceTree = "<group>"; };
+		DA13771925E969FF00FB0FAD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DA2D55152A3B80FB003E09E3 /* DefaultTestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DefaultTestPlan.xctestplan; sourceTree = "<group>"; };
+		DA2D55162A3B8379003E09E3 /* SanitizerTestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SanitizerTestPlan.xctestplan; sourceTree = "<group>"; };
+		DA4F7F462A3F218D00C7C076 /* KYASettings.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = KYASettings.xcstrings; sourceTree = "<group>"; };
+		DA4F7F502A3F21E100C7C076 /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		DA637B3919F14693004C8838 /* KeepingYouAwake.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeepingYouAwake.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA637B3D19F14693004C8838 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA658E6B21CE907B0049F4C1 /* KeepingYouAwake Launcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KeepingYouAwake Launcher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA658E7521CE907D0049F4C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA658E7821CE907D0049F4C1 /* KYALauncher.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KYALauncher.entitlements; sourceTree = "<group>"; };
+		DA898C6E2A3EEE460005A48A /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = SOURCE_ROOT; };
+		DA8AF45E2E50594C00EBD156 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		DA99FF672E2ACF49003B3E09 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		DAD3CF8F271186720006CA14 /* KeepingYouAwake.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeepingYouAwake.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAE9C00D26107E1A00F9ED76 /* Configuration.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configuration.xcconfig; sourceTree = SOURCE_ROOT; };
+		FA00000300000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		FA00000300000000000002 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -233,16 +233,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		DA637B3019F14693004C8838 = {
-			isa = PBXGroup;
-			children = (
-				DA637B3B19F14693004C8838 /* KeepingYouAwake */,
-				DA658E6C21CE907B0049F4C1 /* KYALauncher */,
-				DA637B3A19F14693004C8838 /* Products */,
-				DA25062727C244240052CCD8 /* Frameworks */,
-			);
-			sourceTree = "<group>";
-		};
 		DA25062727C244240052CCD8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -253,7 +243,7 @@
 		DA2C0E3527006AF7006E9991 /* KYAAppUpdater */ = {
 			isa = PBXGroup;
 			children = (
-					00FA0000010000000000000D /* AppUpdater.swift */,
+				00FA0000010000000000000D /* AppUpdater.swift */,
 			);
 			path = KYAAppUpdater;
 			sourceTree = "<group>";
@@ -261,7 +251,7 @@
 		DA2CCD6226F8763100568BDD /* KYASettingsContentViewController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA0000010000000000001B /* SettingsContentViewController.swift */,
+				00FA0000010000000000001B /* SettingsContentViewController.swift */,
 			);
 			path = KYASettingsContentViewController;
 			sourceTree = "<group>";
@@ -269,7 +259,7 @@
 		DA4950F727C97EF2008D1747 /* KYABatterySettingsViewController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA0000010000000000001F /* BatterySettingsViewController.swift */,
+				00FA0000010000000000001F /* BatterySettingsViewController.swift */,
 			);
 			path = KYABatterySettingsViewController;
 			sourceTree = "<group>";
@@ -277,7 +267,7 @@
 		DA51E7DF1C2562BE008AA96C /* KYAGeneralSettingsViewController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA0000010000000000001D /* GeneralSettingsViewController.swift */,
+				00FA0000010000000000001D /* GeneralSettingsViewController.swift */,
 			);
 			path = KYAGeneralSettingsViewController;
 			sourceTree = "<group>";
@@ -285,7 +275,7 @@
 		DA51E7E01C2562C4008AA96C /* KYAAdvancedSettingsViewController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA00000100000000000021 /* AdvancedSettingsViewController.swift */,
+				00FA00000100000000000021 /* AdvancedSettingsViewController.swift */,
 			);
 			path = KYAAdvancedSettingsViewController;
 			sourceTree = "<group>";
@@ -293,7 +283,7 @@
 		DA51E7E11C2562CA008AA96C /* KYAAboutSettingsViewController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA00000100000000000029 /* AboutSettingsViewController.swift */,
+				00FA00000100000000000029 /* AboutSettingsViewController.swift */,
 			);
 			path = KYAAboutSettingsViewController;
 			sourceTree = "<group>";
@@ -301,7 +291,7 @@
 		DA52B1052617021500D09FE5 /* KYAActivationUserNotification */ = {
 			isa = PBXGroup;
 			children = (
-					00FA0000010000000000000F /* ActivationUserNotification.swift */,
+				00FA0000010000000000000F /* ActivationUserNotification.swift */,
 			);
 			path = KYAActivationUserNotification;
 			sourceTree = "<group>";
@@ -309,9 +299,19 @@
 		DA5680182115FF140039C979 /* KYAUpdateSettingsViewController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA0000010000000000002B /* UpdateSettingsViewController.swift */,
+				00FA0000010000000000002B /* UpdateSettingsViewController.swift */,
 			);
 			path = KYAUpdateSettingsViewController;
+			sourceTree = "<group>";
+		};
+		DA637B3019F14693004C8838 = {
+			isa = PBXGroup;
+			children = (
+				DA637B3B19F14693004C8838 /* KeepingYouAwake */,
+				DA658E6C21CE907B0049F4C1 /* KYALauncher */,
+				DA637B3A19F14693004C8838 /* Products */,
+				DA25062727C244240052CCD8 /* Frameworks */,
+			);
 			sourceTree = "<group>";
 		};
 		DA637B3A19F14693004C8838 /* Products */ = {
@@ -334,10 +334,10 @@
 				DA2C0E3527006AF7006E9991 /* KYAAppUpdater */,
 				DA82B1111C2422F600FA46E0 /* Settings */,
 				DAE9C00C26107E0900F9ED76 /* Other… */,
-					00FA00000100000000000001 /* AppMain.swift */,
-					00FA00000100000000000009 /* KYAL10n.swift */,
-					00FA00000100000000000015 /* UserDefaultsSetting.swift */,
-					00FA00000100000000000017 /* BatteryCapacityThreshold.swift */,
+				00FA00000100000000000001 /* AppMain.swift */,
+				00FA00000100000000000009 /* KYAL10n.swift */,
+				00FA00000100000000000015 /* UserDefaultsSetting.swift */,
+				00FA00000100000000000017 /* BatteryCapacityThreshold.swift */,
 			);
 			path = KeepingYouAwake;
 			sourceTree = "<group>";
@@ -357,8 +357,8 @@
 		DA82560E22FB5B31005ECB3A /* KYAActivationDurationsMenuController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA00000100000000000011 /* ActivationDurationsMenuController.swift */,
-					00FA00000100000000000013 /* ActivationDuration+LocalizedTitle.swift */,
+				00FA00000100000000000011 /* ActivationDurationsMenuController.swift */,
+				00FA00000100000000000013 /* ActivationDuration+LocalizedTitle.swift */,
 			);
 			path = KYAActivationDurationsMenuController;
 			sourceTree = "<group>";
@@ -375,7 +375,7 @@
 				DA51E7E01C2562C4008AA96C /* KYAAdvancedSettingsViewController */,
 				DA5680182115FF140039C979 /* KYAUpdateSettingsViewController */,
 				DA51E7E11C2562CA008AA96C /* KYAAboutSettingsViewController */,
-					00FA0000010000000000000B /* KYAL10n+Settings.swift */,
+				00FA0000010000000000000B /* KYAL10n+Settings.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -383,7 +383,7 @@
 		DA898C752A3EF37C0005A48A /* KYASettingsWindow */ = {
 			isa = PBXGroup;
 			children = (
-					00FA00000100000000000019 /* SettingsWindow.swift */,
+				00FA00000100000000000019 /* SettingsWindow.swift */,
 			);
 			path = KYASettingsWindow;
 			sourceTree = "<group>";
@@ -392,8 +392,8 @@
 			isa = PBXGroup;
 			children = (
 				DAB0701322EC8F06004D5BCA /* KYADurationCell */,
-					00FA00000100000000000023 /* DurationSettingsViewController.swift */,
-					00FA00000100000000000025 /* AddDurationViewController.swift */,
+				00FA00000100000000000023 /* DurationSettingsViewController.swift */,
+				00FA00000100000000000025 /* AddDurationViewController.swift */,
 			);
 			path = KYADurationSettingsViewController;
 			sourceTree = "<group>";
@@ -401,7 +401,7 @@
 		DAB0701322EC8F06004D5BCA /* KYADurationCell */ = {
 			isa = PBXGroup;
 			children = (
-					00FA00000100000000000027 /* DurationCellView.swift */,
+				00FA00000100000000000027 /* DurationCellView.swift */,
 			);
 			path = KYADurationCell;
 			sourceTree = "<group>";
@@ -409,8 +409,8 @@
 		DAD6480B24F14570008E9AA0 /* KYAAppController */ = {
 			isa = PBXGroup;
 			children = (
-					00FA00000100000000000003 /* AppDelegate.swift */,
-					00FA00000100000000000005 /* AppController.swift */,
+				00FA00000100000000000003 /* AppDelegate.swift */,
+				00FA00000100000000000005 /* AppController.swift */,
 			);
 			path = KYAAppController;
 			sourceTree = "<group>";
@@ -418,7 +418,7 @@
 		DAD68A7E27C957E20036ED19 /* KYAMainMenu */ = {
 			isa = PBXGroup;
 			children = (
-					00FA00000100000000000007 /* MainMenuBuilder.swift */,
+				00FA00000100000000000007 /* MainMenuBuilder.swift */,
 			);
 			path = KYAMainMenu;
 			sourceTree = "<group>";
@@ -603,7 +603,7 @@
 			files = (
 				DA4F7F472A3F218D00C7C076 /* KYASettings.xcstrings in Resources */,
 				DA898C6F2A3EEE460005A48A /* Credits.rtf in Resources */,
-				DA085D1021D6BAB6003D9B1B /* container-migration.plist in Resources */,
+				DA085D1021D6BAB6003D9B1B /* (null) in Resources */,
 				DA13771A25E969FF00FB0FAD /* Assets.xcassets in Resources */,
 				DA4F7F512A3F21E100C7C076 /* Localizable.xcstrings in Resources */,
 				DA99FF682E2ACF49003B3E09 /* AppIcon.icon in Resources */,
@@ -614,7 +614,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-					DA8AF45F2E50594C00EBD156 /* AppIcon.icon in Resources */,
+				DA8AF45F2E50594C00EBD156 /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -624,7 +624,7 @@
 			files = (
 				DA4F7F482A3F218D00C7C076 /* KYASettings.xcstrings in Resources */,
 				DA898C702A3EEE460005A48A /* Credits.rtf in Resources */,
-				DAD3CF7A271186720006CA14 /* container-migration.plist in Resources */,
+				DAD3CF7A271186720006CA14 /* (null) in Resources */,
 				DAD3CF7C271186720006CA14 /* Assets.xcassets in Resources */,
 				DA4F7F522A3F21E100C7C076 /* Localizable.xcstrings in Resources */,
 				DA99FF692E2ACF49003B3E09 /* AppIcon.icon in Resources */,
@@ -638,28 +638,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-					00FA00000100000000000002 /* AppMain.swift in Sources */,
-					00FA00000100000000000004 /* AppDelegate.swift in Sources */,
-					00FA00000100000000000006 /* AppController.swift in Sources */,
-					00FA00000100000000000008 /* MainMenuBuilder.swift in Sources */,
-					00FA0000010000000000000A /* KYAL10n.swift in Sources */,
-					00FA0000010000000000000C /* KYAL10n+Settings.swift in Sources */,
-					00FA0000010000000000000E /* AppUpdater.swift in Sources */,
-					00FA00000100000000000010 /* ActivationUserNotification.swift in Sources */,
-					00FA00000100000000000012 /* ActivationDurationsMenuController.swift in Sources */,
-					00FA00000100000000000014 /* ActivationDuration+LocalizedTitle.swift in Sources */,
-					00FA00000100000000000016 /* UserDefaultsSetting.swift in Sources */,
-					00FA00000100000000000018 /* BatteryCapacityThreshold.swift in Sources */,
-					00FA0000010000000000001A /* SettingsWindow.swift in Sources */,
-					00FA0000010000000000001C /* SettingsContentViewController.swift in Sources */,
-					00FA0000010000000000001E /* GeneralSettingsViewController.swift in Sources */,
-					00FA00000100000000000020 /* BatterySettingsViewController.swift in Sources */,
-					00FA00000100000000000022 /* AdvancedSettingsViewController.swift in Sources */,
-					00FA00000100000000000024 /* DurationSettingsViewController.swift in Sources */,
-					00FA00000100000000000026 /* AddDurationViewController.swift in Sources */,
-					00FA00000100000000000028 /* DurationCellView.swift in Sources */,
-					00FA0000010000000000002A /* AboutSettingsViewController.swift in Sources */,
-					00FA0000010000000000002C /* UpdateSettingsViewController.swift in Sources */,
+				00FA00000100000000000002 /* AppMain.swift in Sources */,
+				00FA00000100000000000004 /* AppDelegate.swift in Sources */,
+				00FA00000100000000000006 /* AppController.swift in Sources */,
+				00FA00000100000000000008 /* MainMenuBuilder.swift in Sources */,
+				00FA0000010000000000000A /* KYAL10n.swift in Sources */,
+				00FA0000010000000000000C /* KYAL10n+Settings.swift in Sources */,
+				00FA0000010000000000000E /* AppUpdater.swift in Sources */,
+				00FA00000100000000000010 /* ActivationUserNotification.swift in Sources */,
+				00FA00000100000000000012 /* ActivationDurationsMenuController.swift in Sources */,
+				00FA00000100000000000014 /* ActivationDuration+LocalizedTitle.swift in Sources */,
+				00FA00000100000000000016 /* UserDefaultsSetting.swift in Sources */,
+				00FA00000100000000000018 /* BatteryCapacityThreshold.swift in Sources */,
+				00FA0000010000000000001A /* SettingsWindow.swift in Sources */,
+				00FA0000010000000000001C /* SettingsContentViewController.swift in Sources */,
+				00FA0000010000000000001E /* GeneralSettingsViewController.swift in Sources */,
+				00FA00000100000000000020 /* BatterySettingsViewController.swift in Sources */,
+				00FA00000100000000000022 /* AdvancedSettingsViewController.swift in Sources */,
+				00FA00000100000000000024 /* DurationSettingsViewController.swift in Sources */,
+				00FA00000100000000000026 /* AddDurationViewController.swift in Sources */,
+				00FA00000100000000000028 /* DurationCellView.swift in Sources */,
+				00FA0000010000000000002A /* AboutSettingsViewController.swift in Sources */,
+				00FA0000010000000000002C /* UpdateSettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -676,28 +676,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-					FA0000020001000000000001 /* AppMain.swift in Sources */,
-					FA0000020002000000000002 /* AppDelegate.swift in Sources */,
-					FA0000020003000000000003 /* AppController.swift in Sources */,
-					FA0000020004000000000004 /* MainMenuBuilder.swift in Sources */,
-					FA0000020005000000000005 /* KYAL10n.swift in Sources */,
-					FA0000020006000000000006 /* KYAL10n+Settings.swift in Sources */,
-					FA0000020007000000000007 /* AppUpdater.swift in Sources */,
-					FA0000020008000000000008 /* ActivationUserNotification.swift in Sources */,
-					FA0000020009000000000009 /* ActivationDurationsMenuController.swift in Sources */,
-					FA0000020010000000000010 /* ActivationDuration+LocalizedTitle.swift in Sources */,
-					FA0000020011000000000011 /* UserDefaultsSetting.swift in Sources */,
-					FA0000020012000000000012 /* BatteryCapacityThreshold.swift in Sources */,
-					FA0000020013000000000013 /* SettingsWindow.swift in Sources */,
-					FA0000020014000000000014 /* SettingsContentViewController.swift in Sources */,
-					FA0000020015000000000015 /* GeneralSettingsViewController.swift in Sources */,
-					FA0000020016000000000016 /* BatterySettingsViewController.swift in Sources */,
-					FA0000020017000000000017 /* AdvancedSettingsViewController.swift in Sources */,
-					FA0000020018000000000018 /* DurationSettingsViewController.swift in Sources */,
-					FA0000020019000000000019 /* AddDurationViewController.swift in Sources */,
-					FA0000020020000000000020 /* DurationCellView.swift in Sources */,
-					FA0000020021000000000021 /* AboutSettingsViewController.swift in Sources */,
-					FA0000020022000000000022 /* UpdateSettingsViewController.swift in Sources */,
+				FA0000020001000000000001 /* AppMain.swift in Sources */,
+				FA0000020002000000000002 /* AppDelegate.swift in Sources */,
+				FA0000020003000000000003 /* AppController.swift in Sources */,
+				FA0000020004000000000004 /* MainMenuBuilder.swift in Sources */,
+				FA0000020005000000000005 /* KYAL10n.swift in Sources */,
+				FA0000020006000000000006 /* KYAL10n+Settings.swift in Sources */,
+				FA0000020007000000000007 /* AppUpdater.swift in Sources */,
+				FA0000020008000000000008 /* ActivationUserNotification.swift in Sources */,
+				FA0000020009000000000009 /* ActivationDurationsMenuController.swift in Sources */,
+				FA0000020010000000000010 /* ActivationDuration+LocalizedTitle.swift in Sources */,
+				FA0000020011000000000011 /* UserDefaultsSetting.swift in Sources */,
+				FA0000020012000000000012 /* BatteryCapacityThreshold.swift in Sources */,
+				FA0000020013000000000013 /* SettingsWindow.swift in Sources */,
+				FA0000020014000000000014 /* SettingsContentViewController.swift in Sources */,
+				FA0000020015000000000015 /* GeneralSettingsViewController.swift in Sources */,
+				FA0000020016000000000016 /* BatterySettingsViewController.swift in Sources */,
+				FA0000020017000000000017 /* AdvancedSettingsViewController.swift in Sources */,
+				FA0000020018000000000018 /* DurationSettingsViewController.swift in Sources */,
+				FA0000020019000000000019 /* AddDurationViewController.swift in Sources */,
+				FA0000020020000000000020 /* DurationCellView.swift in Sources */,
+				FA0000020021000000000021 /* AboutSettingsViewController.swift in Sources */,
+				FA0000020022000000000022 /* UpdateSettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -715,10 +715,6 @@
 			targetProxy = DAD3CF58271186720006CA14 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		DA637B5419F14694004C8838 /* Debug */ = {
@@ -868,11 +864,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = KeepingYouAwake/KeepingYouAwake.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5KESHV9W85;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = KeepingYouAwake/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -890,12 +887,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = KeepingYouAwake/KeepingYouAwake.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5KESHV9W85;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = KeepingYouAwake/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -921,12 +919,13 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = KYALauncher/KYALauncher.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 5KESHV9W85;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = KYALauncher/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -954,13 +953,14 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = KYALauncher/KYALauncher.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5KESHV9W85;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = KYALauncher/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -981,11 +981,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "KeepingYouAwake/KeepingYouAwake-Direct.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5KESHV9W85;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"KYA_APP_UPDATER_ENABLED=1",
@@ -1009,12 +1010,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "KeepingYouAwake/KeepingYouAwake-Direct.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5KESHV9W85;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"KYA_APP_UPDATER_ENABLED=1",
 					"$(inherited)",
