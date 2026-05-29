@@ -84,10 +84,6 @@ final class AppController {
             self?.statusItemController.appearance = .inactive
             self?.disableDevicePowerMonitoring()
         }
-
-        if UserDefaults.standard.kya_activateOnLaunch {
-            activateTimer()
-        }
     }
 
     private func activateTimer() {
@@ -275,6 +271,33 @@ final class AppController {
                 self?.handleProcessMonitoringPreferenceChange()
             }
         ))
+
+        // Evaluate activation conditions after all monitoring is configured
+        handlePostConfigurationActivation()
+    }
+
+    /// Evaluates whether to activate the timer after launch based on current conditions.
+    /// Priority: process monitoring > external display > Activate on Launch preference.
+    private func handlePostConfigurationActivation() {
+        // If process monitoring is enabled, let it drive activation
+        if UserDefaults.standard.kya_processMonitoringEnabled {
+            let device = Device.current
+            if device.isProcessMonitoringEnabled {
+                let runningProcesses = device.processMonitor.currentlyRunningProcessPaths
+                if !runningProcesses.isEmpty {
+                    NSLog("[AppController] Activating on launch due to running processes")
+                    activateTimer()
+                }
+                // If no processes are running, wait for process monitoring callback
+                return
+            }
+        }
+
+        // Fall back to Activate on Launch preference
+        if UserDefaults.standard.kya_activateOnLaunch {
+            NSLog("[AppController] Activating on launch per user preference")
+            activateTimer()
+        }
     }
 
     private func parseProcessNames() -> Set<String> {
