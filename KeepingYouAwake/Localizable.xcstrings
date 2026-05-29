@@ -620,7 +620,7 @@
       "comment" : "Battery Level"
     },
     "Cancel" : {
-      "comment" : "Cancel",
+      "comment" : "Cancel\nCancel editing process names",
       "localizations" : {
         "da" : {
           "stringUnit" : {
@@ -1416,7 +1416,7 @@
       "comment" : "Minutes"
     },
     "OK" : {
-      "comment" : "OK",
+      "comment" : "Confirm process names\nOK",
       "localizations" : {
         "da" : {
           "stringUnit" : {
