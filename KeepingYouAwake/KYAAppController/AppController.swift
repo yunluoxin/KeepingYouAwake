@@ -26,6 +26,7 @@ final class AppController {
 
     private var workspaceScheduledTimeInterval: TimeInterval = -1
     private var isBatteryOverrideEnabled = false
+    private var isManualDeactivation = false
 
     // Notification observers
     private var observers: [NSObjectProtocol] = []
@@ -147,10 +148,12 @@ final class AppController {
     private func handleActivateAction(_ event: Event) {
         let parameters = event.arguments ?? [:]
         terminateTimer()
+        disableAllMonitoring()
+        isManualDeactivation = false
 
         if parameters.isEmpty {
-            activateTimer()
-            statusItemController.appearance = .active
+            enableAllMonitoring()
+            evaluateConditionsAndActivate()
         } else if let seconds = parameters["seconds"] {
             activateTimerWithTimeInterval(ceil(Double(seconds) ?? 0))
             statusItemController.appearance = .active
@@ -167,9 +170,15 @@ final class AppController {
 
     private func handlePrimaryAction() {
         if sleepWakeTimer.isScheduled {
+            // Manual OFF: global kill switch — stop timer and all monitoring
             terminateTimer()
+            disableAllMonitoring()
+            isManualDeactivation = true
         } else {
-            activateTimer()
+            // Manual ON: re-enable monitoring and let conditions take priority
+            isManualDeactivation = false
+            enableAllMonitoring()
+            evaluateConditionsAndActivate()
         }
     }
 
@@ -219,6 +228,57 @@ final class AppController {
         device.onChange = nil
         device.batteryMonitoringEnabled = false
         device.lowPowerModeMonitoringEnabled = false
+    }
+
+    private func enableAllMonitoring() {
+        let device = Device.current
+        let defaults = UserDefaults.standard
+
+        // Process monitoring
+        if defaults.kya_processMonitoringEnabled {
+            let names = parseProcessNames()
+            if !names.isEmpty {
+                device.processMonitor.trackedProcessNames = names
+                device.processMonitoringEnabled = true
+            }
+        }
+
+        enableDevicePowerMonitoring()
+    }
+
+    private func disableAllMonitoring() {
+        disableDevicePowerMonitoring()
+        Device.current.processMonitoringEnabled = false
+    }
+
+    private func evaluateConditionsAndActivate() {
+        if anyActivationConditionMet() {
+            activateTimerWithTimeInterval(indefiniteTimeInterval)
+        } else {
+            activateTimer()
+        }
+    }
+
+    /// Returns whether any auto-activation condition is currently met.
+    private func anyActivationConditionMet() -> Bool {
+        let defaults = UserDefaults.standard
+        let device = Device.current
+
+        // Process monitoring condition
+        if defaults.kya_processMonitoringEnabled && device.isProcessMonitoringEnabled {
+            if !device.processMonitor.currentlyRunningProcessPaths.isEmpty {
+                return true
+            }
+        }
+
+        // External display condition
+        if defaults.kya_activateOnExternalDisplayConnectedEnabled {
+            if DisplayParameters.numberOfExternalDisplays() > 0 {
+                return true
+            }
+        }
+
+        return false
     }
 
     private func handleDeviceParameterChange(_ parameter: DeviceParameter) {
@@ -279,22 +339,32 @@ final class AppController {
     /// Evaluates whether to activate the timer after launch based on current conditions.
     /// Priority: process monitoring > external display > Activate on Launch preference.
     private func handlePostConfigurationActivation() {
+        let defaults = UserDefaults.standard
+        let device = Device.current
+
         // If process monitoring is enabled, let it drive activation
-        if UserDefaults.standard.kya_processMonitoringEnabled {
-            let device = Device.current
-            if device.isProcessMonitoringEnabled {
-                let runningProcesses = device.processMonitor.currentlyRunningProcessPaths
-                if !runningProcesses.isEmpty {
-                    NSLog("[AppController] Activating on launch due to running processes")
-                    activateTimer()
-                }
-                // If no processes are running, wait for process monitoring callback
+        if defaults.kya_processMonitoringEnabled && device.isProcessMonitoringEnabled {
+            let runningProcesses = device.processMonitor.currentlyRunningProcessPaths
+            if !runningProcesses.isEmpty {
+                NSLog("[AppController] Activating on launch due to running processes")
+                activateTimerWithTimeInterval(indefiniteTimeInterval)
+            }
+            // If no processes are running, wait for process monitoring callback
+            return
+        }
+
+        // Check external display condition
+        if defaults.kya_activateOnExternalDisplayConnectedEnabled {
+            let externalDisplays = DisplayParameters.numberOfExternalDisplays()
+            if externalDisplays > 0 {
+                NSLog("[AppController] Activating on launch due to external display")
+                activateTimerWithTimeInterval(indefiniteTimeInterval)
                 return
             }
         }
 
         // Fall back to Activate on Launch preference
-        if UserDefaults.standard.kya_activateOnLaunch {
+        if defaults.kya_activateOnLaunch {
             NSLog("[AppController] Activating on launch per user preference")
             activateTimer()
         }
@@ -333,16 +403,23 @@ final class AppController {
     /// Activates the timer when any tracked process is running;
     /// deactivates when all tracked processes have exited.
     private func handleProcessMonitoringChange() {
+        guard !isManualDeactivation else { return }
         let device = Device.current
         let hasRunningProcesses = !device.processMonitor.currentlyRunningProcessPaths.isEmpty
 
         if hasRunningProcesses {
             if !sleepWakeTimer.isScheduled {
-                NSLog("[AppController] Process monitoring: activating timer")
-                activateTimer()
+                NSLog("[AppController] Process monitoring: activating timer indefinitely")
+                enableAllMonitoring()
+                activateTimerWithTimeInterval(indefiniteTimeInterval)
+            } else if sleepWakeTimer.scheduledTimeInterval > 0 {
+                // A finite timer is running; conditions take priority → switch to indefinite
+                NSLog("[AppController] Process monitoring: overriding finite timer with indefinite")
+                terminateTimer()
+                activateTimerWithTimeInterval(indefiniteTimeInterval)
             }
         } else {
-            if sleepWakeTimer.isScheduled {
+            if sleepWakeTimer.isScheduled && !anyActivationConditionMet() {
                 NSLog("[AppController] Process monitoring: deactivating timer")
                 terminateTimer()
             }
@@ -403,13 +480,24 @@ final class AppController {
     }
 
     private func handleScreenParametersChange() {
+        guard !isManualDeactivation else { return }
         guard UserDefaults.standard.kya_activateOnExternalDisplayConnectedEnabled else { return }
         let externalDisplays = DisplayParameters.numberOfExternalDisplays()
 
         if externalDisplays == 0 {
-            if sleepWakeTimer.isScheduled { terminateTimer() }
+            if sleepWakeTimer.isScheduled && !anyActivationConditionMet() {
+                terminateTimer()
+            }
         } else {
-            if !sleepWakeTimer.isScheduled { activateTimer() }
+            if !sleepWakeTimer.isScheduled {
+                enableAllMonitoring()
+                activateTimerWithTimeInterval(indefiniteTimeInterval)
+            } else if sleepWakeTimer.scheduledTimeInterval > 0 {
+                // A finite timer is running; conditions take priority → switch to indefinite
+                NSLog("[AppController] External display: overriding finite timer with indefinite")
+                terminateTimer()
+                activateTimerWithTimeInterval(indefiniteTimeInterval)
+            }
         }
     }
 
@@ -432,7 +520,9 @@ final class AppController {
     // MARK: - Duration Selection
 
     private func handleDurationSelection(_ duration: ActivationDuration) {
+        isManualDeactivation = false
         terminateTimer()
+        enableAllMonitoring()
         DispatchQueue.main.async { [weak self] in
             self?.activateTimerWithTimeInterval(duration.seconds)
         }
