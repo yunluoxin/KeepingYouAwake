@@ -36,8 +36,8 @@ final class UpdateSettingsViewController: SettingsContentViewController {
         let checkbox = NSButton(checkboxWithTitle: NSLocalizedString("Check for Pre-Release Updates", tableName: "KYASettings", bundle: .main, value: "Check for Pre-Release Updates", comment: "Check for Pre-Release Updates"), target: nil, action: nil)
         checkbox.setButtonType(.switch)
         checkbox.bind(NSBindingName.value,
-                      to: UserDefaults.standard,
-                      withKeyPath: UserDefaults.preReleaseUpdatesEnabledKey,
+                      to: NSUserDefaultsController.shared,
+                      withKeyPath: "values.\(UserDefaults.preReleaseUpdatesEnabledKey)",
                       options: [.raisesForNotApplicableKeys: true])
         return checkbox
     }()

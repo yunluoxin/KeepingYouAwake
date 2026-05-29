@@ -41,7 +41,7 @@ final class GeneralSettingsViewController: SettingsContentViewController {
         startAtLoginGroup.addView(startAtLoginDescription, in: .top)
 
         activateOnLaunchCheckBox = NSButton(checkboxWithTitle: NSLocalizedString("Activate on Launch", tableName: "KYAGeneralSettingsViewController", bundle: .main, value: "Activate on Launch", comment: "Class = \"NSButtonCell\"; title = \"Activate on Launch\"; ObjectID = \"zql-rZ-9xH\";"), target: nil, action: nil)
-        activateOnLaunchCheckBox.bind(.value, to: UserDefaults.standard, withKeyPath: UserDefaults.activateOnLaunchKey, options: [.continuouslyUpdatesValue: true])
+        activateOnLaunchCheckBox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.activateOnLaunchKey)", options: [.continuouslyUpdatesValue: true])
 
         let activateOnLaunchDescription = NSTextField(labelWithString: NSLocalizedString("Immediately starts preventing sleep when launched.", tableName: "KYAGeneralSettingsViewController", bundle: .main, value: "Immediately starts preventing sleep when launched.", comment: "Class = \"NSTextFieldCell\"; title = \"Immediately starts preventing sleep when launched.\"; ObjectID = \"7QN-oX-fJU\";"))
         activateOnLaunchDescription.font = NSFont.messageFont(ofSize: 11)

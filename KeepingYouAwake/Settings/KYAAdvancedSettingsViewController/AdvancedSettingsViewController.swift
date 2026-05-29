@@ -56,7 +56,7 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
 
         processMonitoringCheckbox = NSButton(checkboxWithTitle: NSLocalizedString("Activate when specified processes are running", tableName: "Localizable", bundle: .main, value: "Activate when specified processes are running", comment: "Activate when specified processes are running"), target: nil, action: nil)
         processMonitoringCheckbox.translatesAutoresizingMaskIntoConstraints = false
-        processMonitoringCheckbox.bind(.value, to: UserDefaults.standard, withKeyPath: UserDefaults.processMonitoringEnabledKey, options: [.continuouslyUpdatesValue: true])
+        processMonitoringCheckbox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processMonitoringEnabledKey)", options: [.continuouslyUpdatesValue: true])
 
         let processNamesLabel = NSTextField(labelWithString: NSLocalizedString("Process Names:", tableName: "Localizable", bundle: .main, value: "Process Names:", comment: "Process Names:"))
         processNamesLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -64,7 +64,7 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         processNamesTextField = NSTextField()
         processNamesTextField.placeholderString = NSLocalizedString("Comma-separated list of process names", tableName: "Localizable", bundle: .main, value: "Comma-separated list of process names", comment: "Comma-separated list of process names")
         processNamesTextField.translatesAutoresizingMaskIntoConstraints = false
-        processNamesTextField.bind(.value, to: UserDefaults.standard, withKeyPath: UserDefaults.processNamesKey, options: [.continuouslyUpdatesValue: true])
+        processNamesTextField.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.processNamesKey)", options: [.continuouslyUpdatesValue: true])
 
         let warningLabel = NSTextField(wrappingLabelWithString: NSLocalizedString("Only change these advanced settings if you know what you are doing. Most of these settings require an app restart.", tableName: "Localizable", bundle: .main, value: "Only change these advanced settings if you know what you are doing. Most of these settings require an app restart.", comment: "Only change these advanced settings if you know what you are doing. Most of these settings require an app restart."))
         warningLabel.font = NSFont.messageFont(ofSize: 11)
@@ -127,12 +127,8 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         for setting in settings { setting.reset() }
         UserDefaults.standard.removeObject(forKey: UserDefaults.processMonitoringEnabledKey)
         UserDefaults.standard.removeObject(forKey: UserDefaults.processNamesKey)
-        UserDefaults.standard.synchronize()
+        NSUserDefaultsController.shared.revertToInitialValues(self)
         tableView.reloadData()
-        processMonitoringCheckbox.unbind(.value)
-        processNamesTextField.unbind(.value)
-        processMonitoringCheckbox.bind(.value, to: UserDefaults.standard, withKeyPath: UserDefaults.processMonitoringEnabledKey, options: [.continuouslyUpdatesValue: true])
-        processNamesTextField.bind(.value, to: UserDefaults.standard, withKeyPath: UserDefaults.processNamesKey, options: [.continuouslyUpdatesValue: true])
     }
 }
 
@@ -160,7 +156,7 @@ extension AdvancedSettingsViewController: NSTableViewDelegate {
 
         cellView.checkbox.title = setting.title
         cellView.settingKey = setting.key
-        cellView.checkbox.bind(.value, to: UserDefaults.standard, withKeyPath: setting.key, options: [.continuouslyUpdatesValue: true])
+        cellView.checkbox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(setting.key)", options: [.continuouslyUpdatesValue: true])
 
         return cellView
     }
