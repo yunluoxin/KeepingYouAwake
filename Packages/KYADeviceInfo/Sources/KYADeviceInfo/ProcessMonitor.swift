@@ -11,9 +11,12 @@ import Foundation
 import ClibprocShim
 
 /// Monitors CLI processes using a three-layer hybrid approach:
-/// - Layer 1: Polling timer (2s interval) for PID diffing via libproc
+/// - Layer 1: Polling timer (1s interval) for PID diffing via libproc
 /// - Layer 2: Path matching to identify target CLI processes
 /// - Layer 3: DispatchSourceProcess exit observers for low-latency exit detection
+///
+/// On register, immediately scans all existing PIDs for target processes.
+/// On unregister, keeps the current sleep prevention state unchanged.
 public final class ProcessMonitor: Monitor {
     /// Called when a tracked process starts or exits.
     /// Parameters: (isRunning, processPaths) where processPaths lists currently
@@ -26,18 +29,37 @@ public final class ProcessMonitor: Monitor {
     }
 
     /// The set of process name patterns to track.
-    /// A process is tracked if its path's last path component matches any pattern.
-    public var trackedProcessNames: Set<String> = []
+    /// A process is tracked if its path's last path component matches any pattern
+    /// (case-insensitive comparison).
+    public var trackedProcessNames: Set<String> = [] {
+        didSet {
+            // Pre-compute lowercase set for efficient case-insensitive matching.
+            // Empty string is never a valid process name, so filter it.
+            lowercaseTrackedNames = Set(trackedProcessNames.map { $0.lowercased() }.filter { !$0.isEmpty })
+        }
+    }
 
-    /// Register: begins the polling timer.
+    /// Pre-computed lowercase names for case-insensitive matching.
+    private var lowercaseTrackedNames: Set<String> = []
+
+    /// Register: immediately scans all current PIDs, then starts 1s polling.
     public func register() {
         guard pollingTimer == nil else { return }
 
-        // Reset known PID state
+        // Reset state
         knownPIDs = Set()
+        trackedProcessPaths = []
+        pidPathMap = [:]
+        exitObservers = [:]
 
+        // Immediately capture all current PIDs and scan for matches
+        let allPIDs = getAllPIDs()
+        knownPIDs = allPIDs
+        scanForMatches(in: allPIDs)
+
+        // Start 1s polling timer
         let timer = DispatchSource.makeTimerSource(queue: pollingQueue)
-        timer.schedule(deadline: .now(), repeating: .seconds(2), leeway: .milliseconds(500))
+        timer.schedule(deadline: .now() + .seconds(1), repeating: .seconds(1), leeway: .milliseconds(200))
         timer.setEventHandler { [weak self] in
             self?.pollProcesses()
         }
@@ -48,6 +70,7 @@ public final class ProcessMonitor: Monitor {
     }
 
     /// Unregister: stops polling and removes all exit observers.
+    /// Does NOT alter the caller's sleep prevention state.
     public func unregister() {
         guard let timer = pollingTimer else { return }
         timer.cancel()
@@ -62,6 +85,7 @@ public final class ProcessMonitor: Monitor {
         // Clear tracked state
         knownPIDs = Set()
         trackedProcessPaths = []
+        pidPathMap = [:]
 
         NSLog("[ProcessMonitor] unregistered")
     }
@@ -82,39 +106,47 @@ public final class ProcessMonitor: Monitor {
     /// Paths of currently tracked (running) target processes.
     private var trackedProcessPaths: [String] = []
 
+    /// Map from PID to its tracked process path.
+    private var pidPathMap: [pid_t: String] = [:]
+
     /// DispatchSourceProcess exit observers keyed by PID.
     private var exitObservers: [pid_t: DispatchSourceProcess] = [:]
 
-    private static let logSubsystem = "info.marcel-dierkes.KeepingYouAwake"
+    // MARK: - PID Enumeration
+
+    /// Gets all current PIDs from the system via libproc.
+    private func getAllPIDs() -> Set<pid_t> {
+        var pidBuffer = [pid_t](repeating: 0, count: 4096)
+        let count = kya_proc_listallpids(&pidBuffer, Int32(pidBuffer.count * MemoryLayout<pid_t>.size))
+        guard count > 0 else { return [] }
+        return Set(pidBuffer[0..<Int(count)])
+    }
 
     // MARK: - Layer 1: PID Polling & Diffing
 
     private func pollProcesses() {
-        // Get current PID list from libproc
-        var pidBuffer = [pid_t](repeating: 0, count: 1024)
-        let count = kya_proc_listallpids(&pidBuffer, Int32(pidBuffer.count * MemoryLayout<pid_t>.size))
-        guard count > 0 else { return }
-
-        let currentPIDs = Set(pidBuffer[0..<Int(count)])
+        let currentPIDs = getAllPIDs()
 
         // Diff: find newly appeared PIDs
         let newPIDs = currentPIDs.subtracting(knownPIDs)
 
-        // Diff: find PIDs that disappeared (exit detected via poll fallback)
+        // Diff: find PIDs that disappeared (fallback cleanup)
         let disappearedPIDs = knownPIDs.subtracting(currentPIDs)
-        cleanUpExitedPIDs(disappearedPIDs)
+        if !disappearedPIDs.isEmpty {
+            cleanupDisappearedPIDs(disappearedPIDs)
+        }
 
         knownPIDs = currentPIDs
 
         // Layer 2: Check new PIDs for target processes
         if !newPIDs.isEmpty && !trackedProcessNames.isEmpty {
-            checkNewPIDs(newPIDs)
+            scanForMatches(in: newPIDs)
         }
     }
 
     // MARK: - Layer 2: Path Matching
 
-    private func checkNewPIDs(_ pids: Set<pid_t>) {
+    private func scanForMatches(in pids: Set<pid_t>) {
         var newTrackedPaths: [String] = []
 
         for pid in pids {
@@ -122,8 +154,10 @@ public final class ProcessMonitor: Monitor {
             guard !path.isEmpty else { continue }
 
             let name = (path as NSString).lastPathComponent
-            if trackedProcessNames.contains(name) {
+            if lowercaseTrackedNames.contains(name.lowercased()) {
                 newTrackedPaths.append(path)
+                pidPathMap[pid] = path
+                NSLog("[ProcessMonitor] Found tracked process: pid=\(pid) name=\(name) path=\(path)")
 
                 // Layer 3: Register exit observer for this PID
                 registerExitObserver(pid)
@@ -132,6 +166,7 @@ public final class ProcessMonitor: Monitor {
 
         if !newTrackedPaths.isEmpty {
             trackedProcessPaths.append(contentsOf: newTrackedPaths)
+            NSLog("[ProcessMonitor] Matched \(newTrackedPaths.count) process(es) in scan, total tracked=\(trackedProcessPaths.count)")
             notifyProcessChange()
         }
     }
@@ -140,7 +175,12 @@ public final class ProcessMonitor: Monitor {
     private func pidPath(_ pid: pid_t) -> String {
         var buffer = [CChar](repeating: 0, count: 4096)
         let result = kya_proc_pidpath(pid, &buffer, Int32(buffer.count))
-        guard result > 0 else { return "" }
+        guard result > 0 else {
+            if result == -1 {
+                NSLog("[ProcessMonitor] pidPath error: pid=\(pid) errno=\(errno)")
+            }
+            return ""
+        }
         return String(cString: buffer)
     }
 
@@ -158,57 +198,37 @@ public final class ProcessMonitor: Monitor {
     }
 
     private func handleProcessExit(_ pid: pid_t) {
-        // Remove the exit observer
+        // Cancel and remove observer
         exitObservers[pid]?.cancel()
         exitObservers.removeValue(forKey: pid)
 
-        // Remove the tracked path for this PID
-        let exitedPath = pidPath(pid) // Path may still be available briefly after exit
-        trackedProcessPaths.removeAll { path in
-            // Match by path or by the last component if the PID path is no longer available
-            if !exitedPath.isEmpty {
-                return path == exitedPath
-            }
-            // Fallback: remove first path matching a tracked name we know was associated with this PID
-            let name = (path as NSString).lastPathComponent
-            return exitedPath.isEmpty && trackedProcessNames.contains(name) && path.contains(String(pid))
+        // Remove the tracked path associated with this PID
+        if let path = pidPathMap[pid] {
+            trackedProcessPaths.removeAll { $0 == path }
         }
-
-        if trackedProcessPaths.isEmpty {
-            NSLog("[ProcessMonitor] all tracked processes exited")
-        }
+        pidPathMap.removeValue(forKey: pid)
 
         notifyProcessChange()
     }
 
     /// Fallback cleanup for PIDs that disappeared between poll cycles
     /// without triggering a DispatchSourceProcess event.
-    private func cleanUpExitedPIDs(_ pids: Set<pid_t>) {
+    private func cleanupDisappearedPIDs(_ pids: Set<pid_t>) {
+        var didChange = false
+
         for pid in pids {
+            guard exitObservers[pid] != nil else { continue }
             exitObservers[pid]?.cancel()
             exitObservers.removeValue(forKey: pid)
+
+            if let path = pidPathMap[pid] {
+                trackedProcessPaths.removeAll { $0 == path }
+            }
+            pidPathMap.removeValue(forKey: pid)
+            didChange = true
         }
 
-        // Rebuild trackedProcessPaths by verifying remaining PIDs
-        var verifiedPaths: [String] = []
-        for path in trackedProcessPaths {
-            let name = (path as NSString).lastPathComponent
-            // Check if any known PID still has this name as its path
-            var stillRunning = false
-            for pid in knownPIDs {
-                let currentPath = pidPath(pid)
-                if (currentPath as NSString).lastPathComponent == name {
-                    stillRunning = true
-                    break
-                }
-            }
-            if stillRunning {
-                verifiedPaths.append(path)
-            }
-        }
-
-        if verifiedPaths.count != trackedProcessPaths.count {
-            trackedProcessPaths = verifiedPaths
+        if didChange {
             notifyProcessChange()
         }
     }
