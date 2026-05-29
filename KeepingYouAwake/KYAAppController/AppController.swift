@@ -37,6 +37,7 @@ final class AppController {
         configureEventHandler()
         configureUserNotificationCenter()
         configureMainMenu()
+        configureProcessMonitoring()
         registerNotifications()
     }
 
@@ -242,6 +243,86 @@ final class AppController {
             }
         @unknown default:
             break
+        }
+    }
+
+    // MARK: - Process Monitoring
+
+    private func configureProcessMonitoring() {
+        let device = Device.current
+
+        // Wire the callback that fires when tracked processes start/exit
+        device.onProcessMonitoringChange = { [weak self] in
+            self?.handleProcessMonitoringChange()
+        }
+
+        // If process monitoring was enabled previously, start tracking
+        if UserDefaults.standard.kya_processMonitoringEnabled {
+            let names = parseProcessNames()
+            if !names.isEmpty {
+                device.processMonitor.trackedProcessNames = names
+                device.processMonitoringEnabled = true
+            }
+        }
+
+        // Observe UserDefaults changes for the process monitoring toggle
+        let center = NotificationCenter.default
+        observers.append(center.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main,
+            using: { [weak self] _ in
+                self?.handleProcessMonitoringPreferenceChange()
+            }
+        ))
+    }
+
+    private func parseProcessNames() -> Set<String> {
+        guard let namesString = UserDefaults.standard.kya_processNames else { return [] }
+        let names = namesString
+            .components(separatedBy: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        return Set(names)
+    }
+
+    private func handleProcessMonitoringPreferenceChange() {
+        let defaults = UserDefaults.standard
+        let device = Device.current
+
+        let isEnabled = defaults.kya_processMonitoringEnabled
+        if isEnabled {
+            let names = parseProcessNames()
+            guard !names.isEmpty else {
+                // If monitoring is enabled but no names are set, disable it
+                device.processMonitoringEnabled = false
+                return
+            }
+            device.processMonitor.trackedProcessNames = names
+            device.processMonitoringEnabled = true
+        } else {
+            // Unregister monitoring without changing timer state
+            device.processMonitoringEnabled = false
+        }
+    }
+
+    /// Called when tracked processes start or exit.
+    /// Activates the timer when any tracked process is running;
+    /// deactivates when all tracked processes have exited.
+    private func handleProcessMonitoringChange() {
+        let device = Device.current
+        let hasRunningProcesses = !device.processMonitor.currentlyRunningProcessPaths.isEmpty
+
+        if hasRunningProcesses {
+            if !sleepWakeTimer.isScheduled {
+                NSLog("[AppController] Process monitoring: activating timer")
+                activateTimer()
+            }
+        } else {
+            if sleepWakeTimer.isScheduled {
+                NSLog("[AppController] Process monitoring: deactivating timer")
+                terminateTimer()
+            }
         }
     }
 
