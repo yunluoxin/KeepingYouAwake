@@ -32,6 +32,7 @@ final class SettingsWindow: NSWindow {
 
         super.init(contentRect: frame, styleMask: styleMask, backing: .buffered, defer: false)
 
+        isReleasedWhenClosed = false
         contentViewController = tabViewController
         collectionBehavior = behavior
         title = KYAL10nSettings.title
