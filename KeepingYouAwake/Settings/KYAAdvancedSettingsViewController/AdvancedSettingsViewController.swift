@@ -43,7 +43,12 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
             tableView.style = .fullWidth
         }
         tableView.selectionHighlightStyle = .none
-        tableView.usesAlternatingRowBackgroundColors = true
+        if #available(macOS 10.14, *) {
+            tableView.usesAlternatingRowBackgroundColors = false
+            tableView.backgroundColor = NSColor.alternatingContentBackgroundColors.first!
+        } else {
+            tableView.usesAlternatingRowBackgroundColors = true
+        }
         tableView.rowHeight = 30
         tableView.dataSource = self
         tableView.delegate = self
@@ -211,6 +216,15 @@ extension AdvancedSettingsViewController: NSTableViewDelegate {
         cellView.checkbox.title = setting.title
         cellView.settingKey = setting.key
         cellView.checkbox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(setting.key)", options: [.continuouslyUpdatesValue: true])
+
+        if #available(macOS 10.14, *) {
+            cellView.wantsLayer = true
+            // Set background directly on the cell view layer instead of relying on
+            // NSTableRowView.backgroundColor, which may not render reliably on newer macOS.
+            cellView.layer?.backgroundColor = (row % 2 == 1)
+                ? NSColor.alternatingContentBackgroundColors.last!.cgColor
+                : nil
+        }
 
         return cellView
     }
