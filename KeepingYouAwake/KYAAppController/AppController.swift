@@ -22,7 +22,7 @@ final class AppController {
     let sleepWakeTimer = SleepWakeTimer()
     let statusItemController = StatusItemController()
     let menuController = ActivationDurationsMenuController()
-    private(set) var menu: NSMenu!
+    var menu: NSMenu!
 
     private var workspaceScheduledTimeInterval: TimeInterval = -1
     private var isBatteryOverrideEnabled = false
@@ -63,7 +63,6 @@ final class AppController {
             guard let self, self.sleepWakeTimer.isScheduled else { return nil }
             return ActivationDuration(seconds: self.sleepWakeTimer.scheduledTimeInterval)
         }
-        menu = MainMenuBuilder.build(activationDurationsSubMenu: menuController.menu)
     }
 
     // MARK: - Status Item

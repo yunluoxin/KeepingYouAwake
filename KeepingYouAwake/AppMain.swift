@@ -14,7 +14,9 @@ struct AppMain {
         let app = NSApplication.shared
         let appDelegate = AppDelegate()
         app.delegate = appDelegate
-        app.mainMenu = MainMenuBuilder.build(activationDurationsSubMenu: appDelegate.appController.menuController.menu)
+        let menu = MainMenuBuilder.build(activationDurationsSubMenu: appDelegate.appController.menuController.menu)
+        appDelegate.appController.menu = menu
+        app.mainMenu = menu
         app.setActivationPolicy(.accessory)
         app.run()
     }
