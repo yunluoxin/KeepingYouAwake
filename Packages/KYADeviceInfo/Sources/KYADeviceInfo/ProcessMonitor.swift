@@ -48,7 +48,6 @@ public final class ProcessMonitor: Monitor {
 
         // Reset state
         knownPIDs = Set()
-        trackedProcessPaths = []
         pidPathMap = [:]
         exitObservers = [:]
 
@@ -84,7 +83,6 @@ public final class ProcessMonitor: Monitor {
 
         // Clear tracked state
         knownPIDs = Set()
-        trackedProcessPaths = []
         pidPathMap = [:]
 
         NSLog("[ProcessMonitor] unregistered")
@@ -92,7 +90,7 @@ public final class ProcessMonitor: Monitor {
 
     /// Returns the paths of currently running tracked processes.
     public var currentlyRunningProcessPaths: [String] {
-        trackedProcessPaths
+        Array(pidPathMap.values)
     }
 
     // MARK: - Private
@@ -102,9 +100,6 @@ public final class ProcessMonitor: Monitor {
 
     /// PIDs discovered in the previous poll cycle.
     private var knownPIDs: Set<pid_t> = []
-
-    /// Paths of currently tracked (running) target processes.
-    private var trackedProcessPaths: [String] = []
 
     /// Map from PID to its tracked process path.
     private var pidPathMap: [pid_t: String] = [:]
@@ -165,8 +160,7 @@ public final class ProcessMonitor: Monitor {
         }
 
         if !newTrackedPaths.isEmpty {
-            trackedProcessPaths.append(contentsOf: newTrackedPaths)
-            NSLog("[ProcessMonitor] Matched \(newTrackedPaths.count) process(es) in scan, total tracked=\(trackedProcessPaths.count)")
+            NSLog("[ProcessMonitor] Matched \(newTrackedPaths.count) process(es) in scan, total tracked=\(pidPathMap.count)")
             notifyProcessChange()
         }
     }
@@ -199,15 +193,15 @@ public final class ProcessMonitor: Monitor {
 
     private func handleProcessExit(_ pid: pid_t) {
         // Cancel and remove observer
+        let path = pidPathMap[pid]
+        let name = path != nil ? (path! as NSString).lastPathComponent : "unknown"
         exitObservers[pid]?.cancel()
         exitObservers.removeValue(forKey: pid)
 
-        // Remove the tracked path associated with this PID
-        if let path = pidPathMap[pid] {
-            trackedProcessPaths.removeAll { $0 == path }
-        }
+        // Remove only this PID's entry — other instances with the same path remain tracked
         pidPathMap.removeValue(forKey: pid)
 
+        NSLog("[ProcessMonitor] Tracked process exited: pid=\(pid) name=\(name), remaining tracked=\(pidPathMap.count)")
         notifyProcessChange()
     }
 
@@ -218,13 +212,14 @@ public final class ProcessMonitor: Monitor {
 
         for pid in pids {
             guard exitObservers[pid] != nil else { continue }
+            let path = pidPathMap[pid]
+            let name = path != nil ? (path! as NSString).lastPathComponent : "unknown"
             exitObservers[pid]?.cancel()
             exitObservers.removeValue(forKey: pid)
 
-            if let path = pidPathMap[pid] {
-                trackedProcessPaths.removeAll { $0 == path }
-            }
+            // Remove only this PID's entry — other instances with the same path remain tracked
             pidPathMap.removeValue(forKey: pid)
+            NSLog("[ProcessMonitor] Disappeared tracked process: pid=\(pid) name=\(name), remaining tracked=\(pidPathMap.count)")
             didChange = true
         }
 
@@ -237,9 +232,10 @@ public final class ProcessMonitor: Monitor {
 
     private func notifyProcessChange() {
         guard let handler = onProcessChange else { return }
-        let isRunning = !trackedProcessPaths.isEmpty
+        let isRunning = !pidPathMap.isEmpty
+        let paths = Array(pidPathMap.values)
         DispatchQueue.main.async {
-            handler(isRunning, self.trackedProcessPaths)
+            handler(isRunning, paths)
         }
     }
 
