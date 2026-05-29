@@ -16,12 +16,17 @@ extension NSImage {
 
     /// Loads the default active icon image from the asset catalog.
     static var defaultActiveIconImage: NSImage {
-        NSImage(named: defaultActiveIconImageName)!
+        let image = NSImage(named: defaultActiveIconImageName)!
+        image.isTemplate = true
+        image.backgroundColor = .white
+        return image
     }
 
     /// Loads the default inactive icon image from the asset catalog.
     static var defaultInactiveIconImage: NSImage {
-        NSImage(named: defaultInactiveIconImageName)!
+        let image = NSImage(named: defaultInactiveIconImageName)!
+        image.isTemplate = true
+        return image
     }
 
     /// Loads a custom active icon image from the Documents directory,
