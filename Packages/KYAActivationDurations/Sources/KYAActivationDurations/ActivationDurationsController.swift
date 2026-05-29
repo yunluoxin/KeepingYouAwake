@@ -9,6 +9,12 @@
 import Foundation
 import KYACommon
 
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
+}
+
 /// Manages adding and removing of activation durations, persistence,
 /// and provides the ability to mark a duration as the default.
 public final class ActivationDurationsController {
@@ -109,9 +115,8 @@ public final class ActivationDurationsController {
     /// - Parameter index: An index into `activationDurations`.
     /// - Returns: `true` if the duration at the index can be removed.
     public func canRemoveActivationDuration(at index: Int) -> Bool {
-        let durations = activationDurations
-        guard index < durations.count else { return false }
-        return durations[index].seconds != 0
+        guard let duration = activationDurations[safe: index] else { return false }
+        return duration.seconds != 0
     }
 
     /// Removes the activation duration at the given index.
@@ -120,9 +125,7 @@ public final class ActivationDurationsController {
     /// - Returns: `true` if a duration was removed.
     @discardableResult
     public func removeActivationDuration(at index: Int) -> Bool {
-        let durations = activationDurations
-        guard index < durations.count else { return false }
-        let duration = durations[index]
+        guard let duration = activationDurations[safe: index] else { return false }
         guard duration.seconds != 0 else { return false }
         return remove(duration)
     }
