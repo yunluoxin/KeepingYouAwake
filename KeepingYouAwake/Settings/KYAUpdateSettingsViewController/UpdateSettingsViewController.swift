@@ -22,8 +22,6 @@ final class UpdateSettingsViewController: SettingsContentViewController {
 
     override class var preferredTitle: String? { KYAL10nSettings.updates }
 
-    override var resizesView: Bool { false }
-
     private lazy var automaticallyCheckCheckbox: NSButton = {
         let checkbox = NSButton(checkboxWithTitle: NSLocalizedString("Automatically Check for Updates", tableName: "KYASettings", bundle: .main, value: "Automatically Check for Updates", comment: "Automatically Check for Updates"), target: nil, action: nil)
         checkbox.setButtonType(.switch)

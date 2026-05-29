@@ -21,8 +21,6 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
         return NSImage(named: "ToolbarDurations")
     }
 
-    override var resizesView: Bool { false }
-
     private let durationsController = ActivationDurationsController.shared
 
     private var tableView: NSTableView!
@@ -48,6 +46,7 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
         tableView.allowsMultipleSelection = false
         tableView.allowsColumnReordering = false
         tableView.allowsColumnResizing = false
+        tableView.headerView = nil
         tableView.dataSource = self
         tableView.delegate = self
         tableView.doubleAction = #selector(setDefaultDuration(_:))
@@ -57,16 +56,12 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
         column.resizingMask = .autoresizingMask
         tableView.addTableColumn(column)
 
-        let clipView = NSClipView()
-        clipView.documentView = tableView
-
         let scrollView = NSScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
         scrollView.borderType = .noBorder
         scrollView.documentView = tableView
-        scrollView.contentView = clipView
 
         DurationCellView.register(in: tableView)
 
@@ -136,6 +131,8 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.reloadData()
+
         durationsController.onChangeDurations = { [weak self] in
             self?.tableView.reloadData()
             self?.updateViewForSelectedRow()
@@ -204,17 +201,13 @@ final class DurationSettingsViewController: SettingsContentViewController, NSTab
         durationsController.activationDurations.count
     }
 
-    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
-        durationsController.activationDurations[row]
-    }
-
     // MARK: - NSTableViewDelegate
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let cell = DurationCellView.dequeue(from: tableView, owner: self)
-        guard let duration = self.tableView(tableView, objectValueFor: tableColumn, row: row) as? ActivationDuration else {
-            return cell
-        }
+        let durations = durationsController.activationDurations
+        guard row < durations.count else { return cell }
+        let duration = durations[row]
         cell.textLabel.stringValue = duration.localizedTitle
 
         let isDefault = durationsController.defaultActivationDuration == duration

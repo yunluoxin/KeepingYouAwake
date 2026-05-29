@@ -23,6 +23,7 @@ final class DurationCellView: NSTableCellView {
 
     static let identifier = NSUserInterfaceItemIdentifier("DurationCellView")
 
+    // Cells are created programmatically in dequeue(); no nib registration needed.
     static func register(in tableView: NSTableView) { }
 
     static func dequeue(from tableView: NSTableView, owner: Any?) -> DurationCellView {

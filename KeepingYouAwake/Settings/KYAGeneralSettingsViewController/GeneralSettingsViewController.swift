@@ -73,11 +73,13 @@ final class GeneralSettingsViewController: SettingsContentViewController {
 
         let separator = NSBox()
         separator.boxType = .separator
+        separator.translatesAutoresizingMaskIntoConstraints = false
 
         let quitButton = NSButton(title: NSLocalizedString("Quit", tableName: "KYAGeneralSettingsViewController", bundle: .main, value: "Quit", comment: "Class = \"NSButtonCell\"; title = \"Quit\"; ObjectID = \"IGL-ft-k8h\";"), target: NSApplication.shared, action: #selector(NSApplication.terminate))
         quitButton.bezelStyle = .rounded
         quitButton.keyEquivalent = "q"
         quitButton.keyEquivalentModifierMask = .command
+        quitButton.translatesAutoresizingMaskIntoConstraints = false
 
         let containerView = NSView()
         containerView.addSubview(contentStack)

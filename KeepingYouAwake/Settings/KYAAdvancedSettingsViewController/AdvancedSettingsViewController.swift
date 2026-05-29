@@ -24,7 +24,6 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
     }
 
     override class var preferredTitle: String? { KYAL10nSettings.advanced }
-    override var resizesView: Bool { false }
 
     override func loadView() {
         view = NSView()

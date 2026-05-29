@@ -25,9 +25,6 @@ class SettingsContentViewController: NSViewController {
     /// Tab bar title. Override in subclass.
     class var preferredTitle: String? { nil }
 
-    /// Whether the view should resize to fit its content.
-    var resizesView: Bool { true }
-
     required init() {
         super.init(nibName: nil, bundle: nil)
         title = type(of: self).preferredTitle
@@ -40,8 +37,10 @@ class SettingsContentViewController: NSViewController {
 
     override func viewWillAppear() {
         super.viewWillAppear()
-        if resizesView {
-            preferredContentSize = view.fittingSize
-        }
+        var size = view.fittingSize
+        size.width = max(size.width, Self.minimumContentWidth)
+        preferredContentSize = size
     }
+
+    static let minimumContentWidth: CGFloat = 480
 }

@@ -28,8 +28,6 @@ class BatterySettingsViewController: SettingsContentViewController {
         KYAL10nSettings.battery
     }
 
-    override var resizesView: Bool { true }
-
     var device: Device { Device.current }
 
     override func loadView() {
