@@ -29,8 +29,9 @@ public final class ProcessMonitor: Monitor {
     }
 
     /// The set of process name patterns to track.
-    /// A process is tracked if its path's last path component matches any pattern
-    /// (case-insensitive comparison).
+    /// A process is tracked when any filter name matches the executable path:
+    /// - Last path component (executable name), case-insensitive exact match.
+    /// - Any other path component, case-insensitive exact match (not substring).
     public var trackedProcessNames: Set<String> = [] {
         didSet {
             // Pre-compute lowercase set for efficient case-insensitive matching.
@@ -149,7 +150,7 @@ public final class ProcessMonitor: Monitor {
             guard !path.isEmpty else { continue }
 
             let name = (path as NSString).lastPathComponent
-            if lowercaseTrackedNames.contains(name.lowercased()) {
+            if ProcessPathMatcher.isTracked(path: path, trackedNames: lowercaseTrackedNames) {
                 newTrackedPaths.append(path)
                 pidPathMap[pid] = path
                 NSLog("[ProcessMonitor] Found tracked process: pid=\(pid) name=\(name) path=\(path)")
@@ -241,5 +242,18 @@ public final class ProcessMonitor: Monitor {
 
     deinit {
         unregister()
+    }
+}
+
+/// Matches executable paths against tracked process name filters.
+enum ProcessPathMatcher {
+    /// Returns true when `path` matches any name in `trackedNames` (already lowercased).
+    static func isTracked(path: String, trackedNames: Set<String>) -> Bool {
+        guard !trackedNames.isEmpty else { return false }
+
+        let components = path.split(separator: "/").map { String($0).lowercased() }
+        guard !components.isEmpty else { return false }
+
+        return components.contains { trackedNames.contains($0) }
     }
 }

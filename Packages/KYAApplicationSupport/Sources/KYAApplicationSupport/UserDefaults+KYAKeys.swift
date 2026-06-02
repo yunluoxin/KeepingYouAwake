@@ -112,7 +112,8 @@ extension UserDefaults {
     // MARK: - Process Names
 
     /// A comma-separated list of process names to monitor for sleep prevention.
-    /// Partial matching is supported (e.g. "node" matches "/usr/local/bin/node").
+    /// Matches the executable name or any exact path component (case-insensitive),
+    /// e.g. "node" matches ".../node" and "cursor-agent" matches ".../cursor-agent/.../node".
     @objc public var kya_processNames: String? {
         get { string(forKey: UserDefaults.processNamesKey) }
         set { set(newValue, forKey: UserDefaults.processNamesKey) }
