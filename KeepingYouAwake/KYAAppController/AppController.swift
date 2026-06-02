@@ -373,7 +373,7 @@ final class AppController {
     private func parseProcessNames() -> Set<String> {
         guard let namesString = UserDefaults.standard.kya_processNames else { return [] }
         let names = namesString
-            .components(separatedBy: ",")
+            .components(separatedBy: CharacterSet(charactersIn: ",\n"))
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
         return Set(names)

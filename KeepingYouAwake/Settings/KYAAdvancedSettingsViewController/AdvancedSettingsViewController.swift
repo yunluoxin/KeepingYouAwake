@@ -14,7 +14,8 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
     private var settings: [UserDefaultsSetting] = []
     private var tableView: NSTableView!
     private var processMonitoringCheckbox: NSButton!
-    private var processNamesTextField: NSTextField!
+    private var processNamesScrollView: NSScrollView!
+    private var processNamesTextView: NSTextView!
     private var processNamesLabel: NSTextField!
     private var processNamesConfirmButton: NSButton!
     private var processNamesCancelButton: NSButton!
@@ -67,9 +68,38 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
 
         processNamesLabel = NSTextField(labelWithString: NSLocalizedString("Process Names:", tableName: "Localizable", bundle: .main, value: "Process Names:", comment: "Process Names:"))
 
-        processNamesTextField = NSTextField()
-        processNamesTextField.placeholderString = NSLocalizedString("Comma-separated list of process names", tableName: "Localizable", bundle: .main, value: "Comma-separated list of process names", comment: "Comma-separated list of process names")
-        processNamesTextField.stringValue = UserDefaults.standard.kya_processNames ?? ""
+        processNamesScrollView = NSScrollView()
+        processNamesScrollView.hasVerticalScroller = true
+        processNamesScrollView.hasHorizontalScroller = false
+        processNamesScrollView.autohidesScrollers = true
+        processNamesScrollView.borderType = .bezelBorder
+        processNamesScrollView.drawsBackground = true
+
+        processNamesTextView = NSTextView()
+        processNamesTextView.isEditable = true
+        processNamesTextView.isSelectable = true
+        processNamesTextView.isRichText = false
+        processNamesTextView.importsGraphics = false
+        processNamesTextView.font = .systemFont(ofSize: NSFont.systemFontSize)
+        processNamesTextView.textContainerInset = NSSize(width: 4, height: 4)
+        processNamesTextView.drawsBackground = true
+        processNamesTextView.backgroundColor = .textBackgroundColor
+        processNamesTextView.isVerticallyResizable = true
+        processNamesTextView.isHorizontallyResizable = false
+        processNamesTextView.autoresizingMask = [.width]
+        processNamesTextView.textContainer?.widthTracksTextView = true
+        processNamesTextView.textContainer?.containerSize = NSSize(
+            width: 0,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        processNamesTextView.minSize = NSSize(width: 0, height: 0)
+        processNamesTextView.maxSize = NSSize(
+            width: CGFloat.greatestFiniteMagnitude,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        processNamesTextView.string = processNamesForDisplay(UserDefaults.standard.kya_processNames)
+
+        processNamesScrollView.documentView = processNamesTextView
 
         processNamesConfirmButton = NSButton(title: NSLocalizedString("OK", tableName: "Localizable", bundle: .main, value: "OK", comment: "Confirm process names"), target: self, action: #selector(confirmProcessNames(_:)))
         processNamesConfirmButton.bezelStyle = .rounded
@@ -87,7 +117,7 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
 
         view.addSubview(processMonitoringCheckbox)
         view.addSubview(processNamesLabel)
-        view.addSubview(processNamesTextField)
+        view.addSubview(processNamesScrollView)
         view.addSubview(processNamesConfirmButton)
         view.addSubview(processNamesCancelButton)
         view.addSubview(warningLabel)
@@ -110,24 +140,25 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
             make.leading.equalTo(view).offset(20)
         }
 
-        processNamesTextField.snp.makeConstraints { make in
-            make.centerY.equalTo(processNamesLabel)
-            make.leading.equalTo(processNamesLabel.snp.trailing).offset(8)
-        }
-
-        processNamesConfirmButton.snp.makeConstraints { make in
-            make.centerY.equalTo(processNamesLabel)
-            make.leading.equalTo(processNamesTextField.snp.trailing).offset(8)
+        processNamesScrollView.snp.makeConstraints { make in
+            make.top.equalTo(processNamesLabel.snp.bottom).offset(4)
+            make.leading.equalTo(view).offset(20)
+            make.trailing.equalTo(view).offset(-20)
+            make.height.equalTo(72)
         }
 
         processNamesCancelButton.snp.makeConstraints { make in
-            make.centerY.equalTo(processNamesLabel)
-            make.leading.equalTo(processNamesConfirmButton.snp.trailing).offset(4)
+            make.top.equalTo(processNamesScrollView.snp.bottom).offset(8)
             make.trailing.equalTo(view).offset(-20)
         }
 
+        processNamesConfirmButton.snp.makeConstraints { make in
+            make.centerY.equalTo(processNamesCancelButton)
+            make.trailing.equalTo(processNamesCancelButton.snp.leading).offset(-4)
+        }
+
         warningLabel.snp.makeConstraints { make in
-            make.top.equalTo(processNamesLabel.snp.bottom).offset(12)
+            make.top.equalTo(processNamesCancelButton.snp.bottom).offset(12)
             make.leading.equalTo(view).offset(20)
             make.trailing.lessThanOrEqualTo(resetButton.snp.leading).offset(-16)
         }
@@ -143,6 +174,37 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         super.viewDidLoad()
         configureAdvancedSettings()
         updateProcessNamesRowVisibility()
+    }
+
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        updateProcessNamesTextViewLayout()
+    }
+
+    private func updateProcessNamesTextViewLayout() {
+        guard !processNamesScrollView.isHidden else { return }
+
+        let contentWidth = processNamesScrollView.contentSize.width
+        guard contentWidth > 0 else { return }
+
+        if let textContainer = processNamesTextView.textContainer,
+           textContainer.containerSize.width != contentWidth {
+            textContainer.containerSize = NSSize(
+                width: contentWidth,
+                height: CGFloat.greatestFiniteMagnitude
+            )
+        }
+
+        var frame = processNamesTextView.frame
+        if frame.width != contentWidth {
+            frame.size.width = contentWidth
+            processNamesTextView.frame = frame
+        }
+
+        processNamesTextView.minSize = NSSize(
+            width: contentWidth,
+            height: processNamesScrollView.contentSize.height
+        )
     }
 
     private func configureAdvancedSettings() {
@@ -161,7 +223,7 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
         UserDefaults.standard.removeObject(forKey: UserDefaults.processNamesKey)
         NSUserDefaultsController.shared.revertToInitialValues(self)
         tableView.reloadData()
-        processNamesTextField.stringValue = ""
+        processNamesTextView.string = ""
         updateProcessNamesRowVisibility()
     }
 
@@ -172,22 +234,39 @@ final class AdvancedSettingsViewController: SettingsContentViewController {
     private func updateProcessNamesRowVisibility() {
         let isEnabled = UserDefaults.standard.kya_processMonitoringEnabled
         if isEnabled {
-            processNamesTextField.stringValue = UserDefaults.standard.kya_processNames ?? ""
+            processNamesTextView.string = processNamesForDisplay(UserDefaults.standard.kya_processNames)
         }
         processNamesLabel.isHidden = !isEnabled
-        processNamesTextField.isHidden = !isEnabled
+        processNamesScrollView.isHidden = !isEnabled
         processNamesConfirmButton.isHidden = !isEnabled
         processNamesCancelButton.isHidden = !isEnabled
     }
 
     @objc private func confirmProcessNames(_ sender: NSButton) {
-        UserDefaults.standard.kya_processNames = processNamesTextField.stringValue
-        processNamesTextField.window?.makeFirstResponder(nil)
+        UserDefaults.standard.kya_processNames = processNamesForStorage(processNamesTextView.string)
+        processNamesTextView.window?.makeFirstResponder(nil)
     }
 
     @objc private func cancelProcessNames(_ sender: NSButton) {
-        processNamesTextField.stringValue = UserDefaults.standard.kya_processNames ?? ""
-        processNamesTextField.window?.makeFirstResponder(nil)
+        processNamesTextView.string = processNamesForDisplay(UserDefaults.standard.kya_processNames)
+        processNamesTextView.window?.makeFirstResponder(nil)
+    }
+
+    private func processNamesForDisplay(_ stored: String?) -> String {
+        guard let stored, !stored.isEmpty else { return "" }
+        return stored
+            .components(separatedBy: CharacterSet(charactersIn: ",\n"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
+    }
+
+    private func processNamesForStorage(_ edited: String) -> String {
+        edited
+            .components(separatedBy: CharacterSet(charactersIn: ",\n"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
     }
 }
 

@@ -111,7 +111,7 @@ extension UserDefaults {
 
     // MARK: - Process Names
 
-    /// A comma-separated list of process names to monitor for sleep prevention.
+    /// Process names to monitor for sleep prevention, one per line (legacy comma-separated values are also supported).
     /// Matches the executable name or any exact path component (case-insensitive),
     /// e.g. "node" matches ".../node" and "cursor-agent" matches ".../cursor-agent/.../node".
     @objc public var kya_processNames: String? {
