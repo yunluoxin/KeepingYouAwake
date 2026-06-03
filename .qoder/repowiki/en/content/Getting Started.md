@@ -57,8 +57,14 @@ The project uses Xcode and a Makefile to orchestrate builds, tests, localization
   make clean
 - Build and test:
   make test
-- Archive and package for distribution:
+- Package Direct distribution app only:
+  make app
+- Package Direct distribution DMG:
+  make dmg
+- Archive and package for App Store:
   make dist
+- Build both App Store and Direct packages:
+  make package
 - Localization update workflow:
   make l10n-update
 
@@ -69,11 +75,19 @@ flowchart TD
 Start(["Developer runs make"]) --> ChooseTask{"Choose Task"}
 ChooseTask --> |clean| Clean["Remove build artifacts"]
 ChooseTask --> |test| Test["Run unit tests with xcodebuild"]
-ChooseTask --> |dist| Dist["Archive and export installer"]
+ChooseTask --> |app| App["Archive Direct app only"]
+ChooseTask --> |dmg| Dmg["Archive and create DMG"]
+ChooseTask --> |dist| Dist["Archive and export App Store package"]
+ChooseTask --> |package| Package["Build App Store zip and Direct DMG"]
 ChooseTask --> |l10n-update| L10n["Export, import, re-export localizations"]
 Test --> End(["Ready for inspection"])
+App --> VerifyApp["Verify code signature"]
+VerifyApp --> End
+Dmg --> VerifyDmg["Verify code signature"]
+VerifyDmg --> End
 Dist --> Verify["Verify code signature"]
 Verify --> End
+Package --> End
 L10n --> End
 Clean --> End
 ```

@@ -15,7 +15,17 @@ This fork recently migrated from Objective-C to Swift. If logic seems unclear, c
 - **Test with sanitizers**: `make test-with-sanitizers`
 - **Test single package**: `swift test --package-path Packages/KYASleepWakeTimer`
 - **Clean**: `make clean`
-- **Build DMG**: `make dmg`
+
+### Packaging
+
+| Command | Channel | Output |
+|---------|---------|--------|
+| `make app` | Direct | `dist/KeepingYouAwake.app` |
+| `make dmg` | Direct | `dist/KeepingYouAwake-2.0.0.dmg` |
+| `make dist` | App Store | `dist/KeepingYouAwake-2.0.0.zip` |
+| `make package` | Both | `.zip` (App Store) + `.dmg` (Direct) |
+
+`make app` archives with the Direct scheme and extracts the signed `.app` without creating a DMG. `make dmg` uses the same build path but wraps the app in a DMG and removes the intermediate `.app`.
 
 Build schemes: `KeepingYouAwake` (App Store), `KeepingYouAwake (Direct)` (direct distribution with hardcoded entitlements), `KeepingYouAwake Launcher` (login helper).
 

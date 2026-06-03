@@ -448,7 +448,10 @@ This guide consolidates the essential processes and standards for contributing t
   - Export localizations: make l10n-export
   - Import localizations: make l10n-import
   - Update localizations: make l10n-update
-  - Package distribution: make dist
+  - Package Direct app only: make app
+  - Package Direct DMG: make dmg
+  - Package App Store distribution: make dist
+  - Package both channels: make package
 
 **Section sources**
 - [Makefile:28-63](file://Makefile#L28-L63)

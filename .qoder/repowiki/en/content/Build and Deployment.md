@@ -220,14 +220,15 @@ Key targets:
 - l10n-export: exports localized resources.
 - l10n-import: imports localized resources.
 - l10n-update: a convenience chain to export, import, and re-export.
-- archive: produces an .xcarchive.
-- export: exports a .pkg using export options.
-- dist: zips the .app and verifies with Gatekeeper.
+- app: archives with the Direct scheme and extracts `dist/KeepingYouAwake.app` (no DMG).
+- dmg: builds the Direct distribution DMG (`dist/KeepingYouAwake-<version>.dmg`).
+- dist: archives and exports the App Store package, then zips the `.app`.
+- package: builds both App Store (`.zip`) and Direct (`.dmg`) distribution artifacts.
 
 Workflow highlights:
 - Reproducible builds: disables automatic package resolution and pins versions.
 - Logging: captures xcodebuild logs to a file.
-- Packaging: creates a distributable zip for direct downloads.
+- Packaging: App Store channel produces a `.zip`; Direct channel produces a standalone `.app` (`make app`) or a `.dmg` (`make dmg`).
 
 **Section sources**
 - [Makefile:1-92](file://Makefile#L1-L92)

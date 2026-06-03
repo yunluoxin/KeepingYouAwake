@@ -110,25 +110,32 @@ $(DIRECT_ARCHIVE):
 	$(SAVE_LOG) \
 	$(BEAUTIFY)
 
-$(OUTPUT_DIR)/$(NAME)-direct.app: $(DIRECT_ARCHIVE)
+$(OUTPUT_DIR)/$(NAME).app: $(DIRECT_ARCHIVE)
 	@echo "Extracting app from archive..."
 	@cp -R "$(DIRECT_ARCHIVE)/Products/Applications/$(NAME).app" "$@"
 	@echo "App extracted to $@"
 
-$(OUTPUT_DIR)/$(NAME)-$(VERSION).dmg: $(OUTPUT_DIR)/$(NAME)-direct.app
+$(OUTPUT_DIR)/$(NAME)-$(VERSION).dmg: $(OUTPUT_DIR)/$(NAME).app
 	@echo "Creating DMG..."
 	@mkdir -p "$(DMG_TMP_DIR)"
-	@cp -R "$(OUTPUT_DIR)/$(NAME)-direct.app" "$(DMG_TMP_DIR)/$(NAME).app"
+	@cp -R "$(OUTPUT_DIR)/$(NAME).app" "$(DMG_TMP_DIR)/$(NAME).app"
 	@ln -s /Applications "$(DMG_TMP_DIR)/Applications"
 	@hdiutil create -volname "$(DMG_VOLUME_NAME)" \
 		-srcfolder "$(DMG_TMP_DIR)" \
 		-ov -format UDZO -imagekey zlib-level=9 \
 		"$(OUTPUT_DIR)/$(NAME)-$(VERSION).dmg"
 	@$(RM) -r "$(DMG_TMP_DIR)"
-	@$(RM) -r "$(OUTPUT_DIR)/$(NAME)-direct.app"
+	@$(RM) -r "$(OUTPUT_DIR)/$(NAME).app"
 	@echo "DMG created: $(OUTPUT_DIR)/$(NAME)-$(VERSION).dmg"
 	@echo "Verifying code signing..."
 	@spctl -a -vv -t install "$(OUTPUT_DIR)/$(NAME)-$(VERSION).dmg" || true
+
+# Build Direct distribution app only (no DMG)
+app: clean dist-clean $(OUTPUT_DIR)/$(NAME).app
+	@echo "Verifying code signing..."
+	@spctl -a -vv "$(OUTPUT_DIR)/$(NAME).app" || true
+	@echo "App built: $(OUTPUT_DIR)/$(NAME).app"
+.PHONY: app
 
 # Build and package DMG (Direct distribution)
 dmg: clean dist-clean $(OUTPUT_DIR)/$(NAME)-$(VERSION).dmg
