@@ -23,11 +23,28 @@ final class GeneralSettingsViewController: SettingsContentViewController {
         KYAL10nSettings.general
     }
 
+    private var masterEnableCheckBox: NSButton!
     private var startAtLoginCheckBox: NSButton!
     private var activateOnLaunchCheckBox: NSButton!
     private var notificationSettingsButton: NSButton!
 
     override func loadView() {
+        // Master switch: the persistent "real off". When unchecked the app is
+        // fully inert regardless of every other preference.
+        masterEnableCheckBox = NSButton(checkboxWithTitle: NSLocalizedString("Enable KeepingYouAwake", tableName: "Localizable", bundle: .main, value: "Enable KeepingYouAwake", comment: "Enable KeepingYouAwake"), target: nil, action: nil)
+        masterEnableCheckBox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.enabledKey)", options: [.continuouslyUpdatesValue: true])
+        masterEnableCheckBox.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+
+        let masterEnableDescription = NSTextField(labelWithString: NSLocalizedString("The master switch. When off, the app does nothing: no sleep prevention and no monitoring.", tableName: "Localizable", bundle: .main, value: "The master switch. When off, the app does nothing: no sleep prevention and no monitoring.", comment: "The master switch. When off, the app does nothing."))
+        masterEnableDescription.font = NSFont.messageFont(ofSize: 11)
+        masterEnableDescription.textColor = .secondaryLabelColor
+
+        let masterEnableGroup = NSStackView()
+        masterEnableGroup.orientation = .vertical
+        masterEnableGroup.alignment = .leading
+        masterEnableGroup.addView(masterEnableCheckBox, in: .top)
+        masterEnableGroup.addView(masterEnableDescription, in: .top)
+
         startAtLoginCheckBox = NSButton(checkboxWithTitle: NSLocalizedString("Start at Login", tableName: "KYAGeneralSettingsViewController", bundle: .main, value: "Start at Login", comment: "Class = \"NSButtonCell\"; title = \"Start at Login\"; ObjectID = \"YWD-DY-pgf\";"), target: nil, action: nil)
         startAtLoginCheckBox.bind(.value, to: NSApplication.shared, withKeyPath: "kya_launchAtLoginEnabled", options: [.raisesForNotApplicableKeys: true, .conditionallySetsEnabled: true])
 
@@ -43,6 +60,8 @@ final class GeneralSettingsViewController: SettingsContentViewController {
 
         activateOnLaunchCheckBox = NSButton(checkboxWithTitle: NSLocalizedString("Activate on Launch", tableName: "KYAGeneralSettingsViewController", bundle: .main, value: "Activate on Launch", comment: "Class = \"NSButtonCell\"; title = \"Activate on Launch\"; ObjectID = \"zql-rZ-9xH\";"), target: nil, action: nil)
         activateOnLaunchCheckBox.bind(.value, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.activateOnLaunchKey)", options: [.continuouslyUpdatesValue: true])
+        // Subordinate to the master switch: grayed out while the app is disabled.
+        activateOnLaunchCheckBox.bind(.enabled, to: NSUserDefaultsController.shared, withKeyPath: "values.\(UserDefaults.enabledKey)", options: [.continuouslyUpdatesValue: true])
 
         let activateOnLaunchDescription = NSTextField(labelWithString: NSLocalizedString("Immediately starts preventing sleep when launched.", tableName: "KYAGeneralSettingsViewController", bundle: .main, value: "Immediately starts preventing sleep when launched.", comment: "Class = \"NSTextFieldCell\"; title = \"Immediately starts preventing sleep when launched.\"; ObjectID = \"7QN-oX-fJU\";"))
         activateOnLaunchDescription.font = NSFont.messageFont(ofSize: 11)
@@ -66,6 +85,7 @@ final class GeneralSettingsViewController: SettingsContentViewController {
         contentStack.orientation = .vertical
         contentStack.alignment = .leading
         contentStack.spacing = 16
+        contentStack.addView(masterEnableGroup, in: .top)
         contentStack.addView(startAtLoginGroup, in: .top)
         contentStack.addView(activateOnLaunchGroup, in: .top)
         contentStack.addView(notificationSettingsButton, in: .top)
@@ -114,7 +134,9 @@ final class GeneralSettingsViewController: SettingsContentViewController {
     }
 
     deinit {
+        masterEnableCheckBox?.unbind(.value)
         startAtLoginCheckBox?.unbind(.value)
         activateOnLaunchCheckBox?.unbind(.value)
+        activateOnLaunchCheckBox?.unbind(.enabled)
     }
 }

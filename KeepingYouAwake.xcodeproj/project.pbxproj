@@ -11,6 +11,7 @@
 		00FA00000100000000000004 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000003 /* AppDelegate.swift */; };
 		00FA00000100000000000006 /* AppController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000005 /* AppController.swift */; };
 		00FA00000100000000000008 /* MainMenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000007 /* MainMenuBuilder.swift */; };
+		00FA00000100000000000032 /* MainMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000030 /* MainMenuController.swift */; };
 		00FA0000010000000000000A /* KYAL10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000009 /* KYAL10n.swift */; };
 		00FA0000010000000000000C /* KYAL10n+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA0000010000000000000B /* KYAL10n+Settings.swift */; };
 		00FA0000010000000000000E /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA0000010000000000000D /* AppUpdater.swift */; };
@@ -65,6 +66,7 @@
 		FA0000020002000000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000003 /* AppDelegate.swift */; };
 		FA0000020003000000000003 /* AppController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000005 /* AppController.swift */; };
 		FA0000020004000000000004 /* MainMenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000007 /* MainMenuBuilder.swift */; };
+		FA0000020004000000000033 /* MainMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000030 /* MainMenuController.swift */; };
 		FA0000020005000000000005 /* KYAL10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA00000100000000000009 /* KYAL10n.swift */; };
 		FA0000020006000000000006 /* KYAL10n+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA0000010000000000000B /* KYAL10n+Settings.swift */; };
 		FA0000020007000000000007 /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FA0000010000000000000D /* AppUpdater.swift */; };
@@ -154,6 +156,7 @@
 		00FA00000100000000000003 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		00FA00000100000000000005 /* AppController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppController.swift; sourceTree = "<group>"; };
 		00FA00000100000000000007 /* MainMenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuBuilder.swift; sourceTree = "<group>"; };
+		00FA00000100000000000030 /* MainMenuController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuController.swift; sourceTree = "<group>"; };
 		00FA00000100000000000009 /* KYAL10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KYAL10n.swift; sourceTree = "<group>"; };
 		00FA0000010000000000000B /* KYAL10n+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KYAL10n+Settings.swift"; sourceTree = "<group>"; };
 		00FA0000010000000000000D /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
@@ -419,6 +422,7 @@
 			isa = PBXGroup;
 			children = (
 				00FA00000100000000000007 /* MainMenuBuilder.swift */,
+				00FA00000100000000000030 /* MainMenuController.swift */,
 			);
 			path = KYAMainMenu;
 			sourceTree = "<group>";
@@ -645,6 +649,7 @@
 				00FA00000100000000000004 /* AppDelegate.swift in Sources */,
 				00FA00000100000000000006 /* AppController.swift in Sources */,
 				00FA00000100000000000008 /* MainMenuBuilder.swift in Sources */,
+				00FA00000100000000000032 /* MainMenuController.swift in Sources */,
 				00FA0000010000000000000A /* KYAL10n.swift in Sources */,
 				00FA0000010000000000000C /* KYAL10n+Settings.swift in Sources */,
 				00FA0000010000000000000E /* AppUpdater.swift in Sources */,
@@ -683,6 +688,7 @@
 				FA0000020002000000000002 /* AppDelegate.swift in Sources */,
 				FA0000020003000000000003 /* AppController.swift in Sources */,
 				FA0000020004000000000004 /* MainMenuBuilder.swift in Sources */,
+				FA0000020004000000000033 /* MainMenuController.swift in Sources */,
 				FA0000020005000000000005 /* KYAL10n.swift in Sources */,
 				FA0000020006000000000006 /* KYAL10n+Settings.swift in Sources */,
 				FA0000020007000000000007 /* AppUpdater.swift in Sources */,

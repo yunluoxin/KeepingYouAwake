@@ -27,6 +27,7 @@ extension UserDefaults {
     public static let activateOnExternalDisplayConnectedEnabledKey = "info.marcel-dierkes.KeepingYouAwake.ActivateOnExternalDisplayConnectedEnabled"
     public static let deactivateOnUserSwitchEnabledKey = "info.marcel-dierkes.KeepingYouAwake.DeactivateOnUserSwitchEnabled"
     public static let processMonitoringEnabledKey = "info.marcel-dierkes.KeepingYouAwake.ProcessMonitoringEnabled"
+    public static let enabledKey = "info.marcel-dierkes.KeepingYouAwake.Enabled"
 
     // Special property keys
     public static let batteryCapacityThresholdKey = "info.marcel-dierkes.KeepingYouAwake.BatteryCapacityThreshold"
@@ -96,6 +97,17 @@ extension UserDefaults {
     @objc public var kya_processMonitoringEnabled: Bool {
         get { bool(forKey: UserDefaults.processMonitoringEnabledKey) }
         set { set(newValue, forKey: UserDefaults.processMonitoringEnabledKey) }
+    }
+
+    /// The persistent master switch. When false, the app is fully inert:
+    /// no caffeinate timer and no process/display/battery monitoring,
+    /// regardless of every other preference. Defaults to true when unset.
+    @objc public var kya_enabled: Bool {
+        get {
+            if object(forKey: UserDefaults.enabledKey) == nil { return true }
+            return bool(forKey: UserDefaults.enabledKey)
+        }
+        set { set(newValue, forKey: UserDefaults.enabledKey) }
     }
 
     // MARK: - Battery Capacity Threshold

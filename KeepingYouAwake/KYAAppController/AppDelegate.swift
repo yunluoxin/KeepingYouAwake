@@ -33,6 +33,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
 
+    @objc func toggleMasterSwitch(_ sender: Any?) {
+        appController.toggleMasterSwitch()
+    }
+
     @objc func showSettingsWindow(_ sender: Any?) {
         if #available(macOS 14.0, *) {
             NSApplication.shared.activate()

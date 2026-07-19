@@ -12,4 +12,6 @@ public enum StatusItemAppearance {
     case inactive
     /// Represents the active state of the status bar item.
     case active
+    /// Represents the disabled state of the status bar item (master switch off).
+    case disabled
 }

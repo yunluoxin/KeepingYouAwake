@@ -22,11 +22,25 @@ final class AppController {
     let sleepWakeTimer = SleepWakeTimer()
     let statusItemController = StatusItemController()
     let menuController = ActivationDurationsMenuController()
-    var menu: NSMenu!
+    let mainMenuController = MainMenuController()
+    var menu: NSMenu! {
+        didSet {
+            // Refresh the dynamic items (status line, toggle, activate)
+            // each time the menu is about to be shown.
+            menu.delegate = mainMenuController
+        }
+    }
 
     private var workspaceScheduledTimeInterval: TimeInterval = -1
     private var isBatteryOverrideEnabled = false
-    private var isManualDeactivation = false
+
+    /// The persistent master switch. When false the app is fully inert:
+    /// no caffeinate timer and no process/display/battery monitoring.
+    /// Backed by UserDefaults so a real "off" survives relaunch.
+    private var isEnabled: Bool {
+        get { UserDefaults.standard.kya_enabled }
+        set { UserDefaults.standard.kya_enabled = newValue }
+    }
 
     // Notification observers
     private var observers: [NSObjectProtocol] = []
@@ -65,6 +79,28 @@ final class AppController {
             guard let self, self.sleepWakeTimer.isScheduled else { return nil }
             return ActivationDuration(seconds: self.sleepWakeTimer.scheduledTimeInterval)
         }
+
+        mainMenuController.isEnabled = { [weak self] in self?.isEnabled ?? true }
+        mainMenuController.isActive = { [weak self] in self?.sleepWakeTimer.isScheduled ?? false }
+        mainMenuController.activationReason = { [weak self] in self?.currentActivationReason() }
+    }
+
+    /// A short human-readable reason describing why sleep is currently being
+    /// prevented, derived from the highest-priority active trigger.
+    private func currentActivationReason() -> String? {
+        let device = Device.current
+        let defaults = UserDefaults.standard
+
+        if defaults.kya_processMonitoringEnabled,
+           device.isProcessMonitoringEnabled,
+           !device.processMonitor.currentlyRunningProcessPaths.isEmpty {
+            return NSLocalizedString("Process", tableName: "Localizable", bundle: .main, value: "Process", comment: "Process")
+        }
+        if defaults.kya_activateOnExternalDisplayConnectedEnabled,
+           DisplayParameters.numberOfExternalDisplays() > 0 {
+            return NSLocalizedString("External Display", tableName: "Localizable", bundle: .main, value: "External Display", comment: "External Display")
+        }
+        return nil
     }
 
     // MARK: - Status Item
@@ -78,12 +114,25 @@ final class AppController {
 
     private func configureSleepWakeTimer() {
         sleepWakeTimer.onActivate = { [weak self] _ in
-            self?.statusItemController.appearance = .active
             self?.enableDevicePowerMonitoring()
+            self?.updateAppearance()
         }
         sleepWakeTimer.onDeactivate = { [weak self] in
-            self?.statusItemController.appearance = .inactive
             self?.disableDevicePowerMonitoring()
+            self?.updateAppearance()
+        }
+    }
+
+    /// Derives the status item appearance from the two orthogonal states:
+    /// the master switch (isEnabled) and the current activation state
+    /// (sleepWakeTimer.isScheduled). The icon never holds state of its own.
+    private func updateAppearance() {
+        if !isEnabled {
+            statusItemController.appearance = .disabled
+        } else if sleepWakeTimer.isScheduled {
+            statusItemController.appearance = .active
+        } else {
+            statusItemController.appearance = .inactive
         }
     }
 
@@ -136,8 +185,7 @@ final class AppController {
         }
 
         eventHandler.registerAction(name: "deactivate") { [weak self] _ in
-            self?.terminateTimer()
-            self?.statusItemController.appearance = .inactive
+            self?.setEnabled(false)
         }
 
         eventHandler.registerAction(name: "toggle") { [weak self] _ in
@@ -145,41 +193,56 @@ final class AppController {
         }
     }
 
-    private func handleActivateAction(_ event: Event) {
-        let parameters = event.arguments ?? [:]
-        terminateTimer()
-        disableAllMonitoring()
-        isManualDeactivation = false
-
-        if parameters.isEmpty {
+    /// Sets the persistent master switch and applies its side effects.
+    /// OFF: stop the timer and tear down every monitor (fully inert).
+    /// ON:  restore monitoring and let activation conditions take priority.
+    private func setEnabled(_ enabled: Bool) {
+        isEnabled = enabled
+        if enabled {
             enableAllMonitoring()
             evaluateConditionsAndActivate()
-        } else if let seconds = parameters["seconds"] {
-            activateTimerWithTimeInterval(ceil(Double(seconds) ?? 0))
-            statusItemController.appearance = .active
-        } else if let minutes = parameters["minutes"] {
-            activateTimerWithTimeInterval(ceil(Double(minutes) ?? 0) * 60)
-            statusItemController.appearance = .active
-        } else if let hours = parameters["hours"] {
-            activateTimerWithTimeInterval(ceil(Double(hours) ?? 0) * 3600)
-            statusItemController.appearance = .active
         } else {
-            statusItemController.appearance = .inactive
+            terminateTimer()
+            disableAllMonitoring()
+        }
+        updateAppearance()
+    }
+
+    private func handleActivateAction(_ event: Event) {
+        let parameters = event.arguments ?? [:]
+
+        if parameters.isEmpty {
+            // Master switch ON, then let conditions drive activation.
+            setEnabled(true)
+        } else if let seconds = parameters["seconds"] {
+            isEnabled = true
+            terminateTimer()
+            activateTimerWithTimeInterval(ceil(Double(seconds) ?? 0))
+            updateAppearance()
+        } else if let minutes = parameters["minutes"] {
+            isEnabled = true
+            terminateTimer()
+            activateTimerWithTimeInterval(ceil(Double(minutes) ?? 0) * 60)
+            updateAppearance()
+        } else if let hours = parameters["hours"] {
+            isEnabled = true
+            terminateTimer()
+            activateTimerWithTimeInterval(ceil(Double(hours) ?? 0) * 3600)
+            updateAppearance()
+        } else {
+            updateAppearance()
         }
     }
 
+    /// Left-click on the status item: toggle the persistent master switch.
+    /// This is the single, unambiguous "real off" / "real on" control.
     private func handlePrimaryAction() {
-        if sleepWakeTimer.isScheduled {
-            // Manual OFF: global kill switch — stop timer and all monitoring
-            terminateTimer()
-            disableAllMonitoring()
-            isManualDeactivation = true
-        } else {
-            // Manual ON: re-enable monitoring and let conditions take priority
-            isManualDeactivation = false
-            enableAllMonitoring()
-            evaluateConditionsAndActivate()
-        }
+        setEnabled(!isEnabled)
+    }
+
+    /// Public entry point for the menu's Disable/Enable item.
+    func toggleMasterSwitch() {
+        setEnabled(!isEnabled)
     }
 
     // MARK: - User Notification Center
@@ -312,8 +375,9 @@ final class AppController {
             self?.handleProcessMonitoringChange()
         }
 
-        // If process monitoring was enabled previously, start tracking
-        if UserDefaults.standard.kya_processMonitoringEnabled {
+        // If process monitoring was enabled previously, start tracking.
+        // Skip entirely when the master switch is off so launch stays inert.
+        if isEnabled, UserDefaults.standard.kya_processMonitoringEnabled {
             let names = parseProcessNames()
             if !names.isEmpty {
                 device.processMonitor.trackedProcessNames = names
@@ -339,6 +403,12 @@ final class AppController {
     /// Evaluates whether to activate the timer after launch based on current conditions.
     /// Priority: process monitoring > external display > Activate on Launch preference.
     private func handlePostConfigurationActivation() {
+        // Master switch off: the app stays fully inert on launch.
+        guard isEnabled else {
+            updateAppearance()
+            return
+        }
+
         let defaults = UserDefaults.standard
         let device = Device.current
 
@@ -380,6 +450,11 @@ final class AppController {
     }
 
     private func handleProcessMonitoringPreferenceChange() {
+        // The master switch overrides the process-monitoring preference.
+        guard isEnabled else {
+            Device.current.processMonitoringEnabled = false
+            return
+        }
         let defaults = UserDefaults.standard
         let device = Device.current
 
@@ -403,7 +478,7 @@ final class AppController {
     /// Activates the timer when any tracked process is running;
     /// deactivates when all tracked processes have exited.
     private func handleProcessMonitoringChange() {
-        guard !isManualDeactivation else { return }
+        guard isEnabled else { return }
         let device = Device.current
         let hasRunningProcesses = !device.processMonitor.currentlyRunningProcessPaths.isEmpty
 
@@ -480,7 +555,7 @@ final class AppController {
     }
 
     private func handleScreenParametersChange() {
-        guard !isManualDeactivation else { return }
+        guard isEnabled else { return }
         guard UserDefaults.standard.kya_activateOnExternalDisplayConnectedEnabled else { return }
         let externalDisplays = DisplayParameters.numberOfExternalDisplays()
 
@@ -502,6 +577,7 @@ final class AppController {
     }
 
     private func handleWorkspaceSessionDidBecomeActive() {
+        guard isEnabled else { return }
         let defaults = UserDefaults.standard
         if defaults.kya_deactivateOnUserSwitchEnabled && workspaceScheduledTimeInterval >= 0 {
             activateTimerWithTimeInterval(workspaceScheduledTimeInterval)
@@ -520,11 +596,14 @@ final class AppController {
     // MARK: - Duration Selection
 
     private func handleDurationSelection(_ duration: ActivationDuration) {
-        isManualDeactivation = false
+        // Choosing an explicit duration is an intent to be active: turn the
+        // master switch on and activate, letting conditions keep priority.
+        isEnabled = true
         terminateTimer()
         enableAllMonitoring()
         DispatchQueue.main.async { [weak self] in
             self?.activateTimerWithTimeInterval(duration.seconds)
+            self?.updateAppearance()
         }
     }
 }

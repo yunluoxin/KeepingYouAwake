@@ -23,6 +23,18 @@ enum KYAL10n {
     static let settingsEllipsis = NSLocalizedString("Settings…", tableName: "Localizable", bundle: .main, value: "Settings…", comment: "Settings…")
     static let quit = NSLocalizedString("Quit", tableName: "Localizable", bundle: .main, value: "Quit", comment: "Quit")
 
+    // MARK: - Master Switch & Status
+
+    static let disable = NSLocalizedString("Disable", tableName: "Localizable", bundle: .main, value: "Disable", comment: "Disable")
+    static let enable = NSLocalizedString("Enable", tableName: "Localizable", bundle: .main, value: "Enable", comment: "Enable")
+    static let statusDisabled = NSLocalizedString("Status: Disabled", tableName: "Localizable", bundle: .main, value: "Status: Disabled", comment: "Status: Disabled")
+    static let statusIdle = NSLocalizedString("Status: Allowing Sleep", tableName: "Localizable", bundle: .main, value: "Status: Allowing Sleep", comment: "Status: Allowing Sleep")
+    static let statusActive = NSLocalizedString("Status: Preventing Sleep", tableName: "Localizable", bundle: .main, value: "Status: Preventing Sleep", comment: "Status: Preventing Sleep")
+
+    static func statusActiveReason(_ reason: String) -> String {
+        String(format: NSLocalizedString("Status: Preventing Sleep (%@)", tableName: "Localizable", bundle: .main, value: "Status: Preventing Sleep (%@)", comment: "Status: Preventing Sleep (%@)"), reason)
+    }
+
     // MARK: - Duration Display
 
     static let isDefaultSuffix = NSLocalizedString("(Default)", tableName: "Localizable", bundle: .main, value: "(Default)", comment: "(Default)")

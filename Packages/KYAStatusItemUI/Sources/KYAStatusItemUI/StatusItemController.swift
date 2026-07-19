@@ -36,25 +36,35 @@ public final class StatusItemController: NSObject {
     /// A delegate for receiving click events.
     public weak var delegate: StatusItemControllerDelegate?
 
-    /// Controls the active/inactive appearance of the status item image.
+    /// Controls the active/inactive/disabled appearance of the status item image.
+    ///
+    /// Backed by explicit storage rather than comparing button images, because
+    /// `.disabled` reuses the inactive image at reduced alpha and would be
+    /// indistinguishable from `.inactive` by image comparison alone.
+    public private(set) var currentAppearance: StatusItemAppearance = .inactive
+
+    /// Controls the active/inactive/disabled appearance of the status item image.
     public var appearance: StatusItemAppearance {
-        get {
-            let provider = StatusItemImageProvider.currentProvider
-            return systemStatusItem.button?.image == provider.activeIconImage
-                ? .active : .inactive
-        }
+        get { currentAppearance }
         set {
             willChangeValue(forKey: "appearance")
+            currentAppearance = newValue
             let button = systemStatusItem.button!
             let provider = StatusItemImageProvider.currentProvider
 
             switch newValue {
             case .active:
                 button.image = provider.activeIconImage
+                button.alphaValue = 1.0
                 button.toolTip = StatusItemUIL10n.clickToAllowSleep
             case .inactive:
                 button.image = provider.inactiveIconImage
+                button.alphaValue = 1.0
                 button.toolTip = StatusItemUIL10n.clickToPreventSleep
+            case .disabled:
+                button.image = provider.inactiveIconImage
+                button.alphaValue = 0.35
+                button.toolTip = StatusItemUIL10n.clickToEnable
             }
             didChangeValue(forKey: "appearance")
         }

@@ -26,4 +26,11 @@ enum StatusItemUIL10n {
         bundle: .main,
         comment: "Click to prevent sleep\nRight click to show menu"
     )
+
+    /// Tooltip shown when the master switch is off (app disabled).
+    static let clickToEnable = NSLocalizedString(
+        "Click to enable\nRight click to show menu",
+        bundle: .main,
+        comment: "Click to enable\nRight click to show menu"
+    )
 }
