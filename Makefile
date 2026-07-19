@@ -141,6 +141,27 @@ app: clean dist-clean $(OUTPUT_DIR)/$(NAME).app
 dmg: clean dist-clean $(OUTPUT_DIR)/$(NAME)-$(VERSION).dmg
 .PHONY: dmg
 
+# Build and install to ~/Applications (fallback: /Applications), restarting the app if it was running
+install: app
+	@INSTALL_DIR="$(HOME)/Applications"; \
+	if [ ! -d "$$INSTALL_DIR" ]; then INSTALL_DIR="/Applications"; fi; \
+	WAS_RUNNING=0; \
+	if pgrep -x "$(NAME)" >/dev/null 2>&1; then \
+		echo "Stopping running $(NAME)..."; \
+		pkill -x "$(NAME)"; \
+		WAS_RUNNING=1; \
+		sleep 1; \
+	fi; \
+	echo "Installing to $$INSTALL_DIR/$(NAME).app..."; \
+	rm -rf "$$INSTALL_DIR/$(NAME).app"; \
+	cp -R "$(OUTPUT_DIR)/$(NAME).app" "$$INSTALL_DIR/$(NAME).app"; \
+	if [ "$$WAS_RUNNING" = "1" ]; then \
+		echo "Relaunching $(NAME)..."; \
+		open "$$INSTALL_DIR/$(NAME).app"; \
+	fi; \
+	echo "Installed: $$INSTALL_DIR/$(NAME).app"
+.PHONY: install
+
 # Build both App Store and Direct distribution packages
 package: clean dist-clean
 	@echo ""
