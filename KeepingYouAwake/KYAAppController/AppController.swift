@@ -115,11 +115,25 @@ final class AppController {
     private func configureSleepWakeTimer() {
         sleepWakeTimer.onActivate = { [weak self] _ in
             self?.enableDevicePowerMonitoring()
-            self?.updateAppearance()
+            // schedule() fires onActivate BEFORE the caffeinate process is
+            // spawned, so isScheduled is still false here. Set the icon
+            // directly instead of deriving it from isScheduled.
+            self?.setAppearance(active: true)
         }
         sleepWakeTimer.onDeactivate = { [weak self] in
             self?.disableDevicePowerMonitoring()
+            // The caffeinate process is already gone here, so isScheduled is
+            // false and derivation is safe.
             self?.updateAppearance()
+        }
+    }
+
+    /// Sets the icon for a known activation change, honoring the master switch.
+    private func setAppearance(active: Bool) {
+        if !isEnabled {
+            statusItemController.appearance = .disabled
+        } else {
+            statusItemController.appearance = active ? .active : .inactive
         }
     }
 
