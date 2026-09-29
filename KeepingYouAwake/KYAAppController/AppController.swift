@@ -93,8 +93,8 @@ final class AppController {
 
         if defaults.kya_processMonitoringEnabled,
            device.isProcessMonitoringEnabled,
-           !device.processMonitor.currentlyRunningProcessPaths.isEmpty {
-            return NSLocalizedString("Process", tableName: "Localizable", bundle: .main, value: "Process", comment: "Process")
+           let processName = firstRunningTrackedProcessName() {
+            return processName
         }
         if defaults.kya_activateOnExternalDisplayConnectedEnabled,
            DisplayParameters.numberOfExternalDisplays() > 0 {
@@ -461,6 +461,22 @@ final class AppController {
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
         return Set(names)
+    }
+
+    /// Returns the display name of the first tracked running process, used as
+    /// the human-readable reason for the status menu (e.g. "caffeinate").
+    /// Prefers the user's configured listener name when it matches; otherwise
+    /// falls back to the executable's last path component.
+    private func firstRunningTrackedProcessName() -> String? {
+        let paths = Device.current.processMonitor.currentlyRunningProcessPaths
+        guard let path = paths.first else { return nil }
+
+        let configuredNames = parseProcessNames()
+        let components = path.split(separator: "/").map { String($0) }
+        if let exactMatch = configuredNames.first(where: { components.contains($0) }) {
+            return exactMatch
+        }
+        return components.last
     }
 
     private func handleProcessMonitoringPreferenceChange() {
