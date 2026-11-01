@@ -466,14 +466,16 @@ final class AppController {
     /// Returns the display name of the first tracked running process, used as
     /// the human-readable reason for the status menu (e.g. "caffeinate").
     /// Prefers the user's configured listener name when it matches; otherwise
-    /// falls back to the executable's last path component.
+    /// falls back to the executable's last path component. With several
+    /// tracked processes running, the lexicographically first path wins so
+    /// the displayed name is stable between menu refreshes.
     private func firstRunningTrackedProcessName() -> String? {
         let paths = Device.current.processMonitor.currentlyRunningProcessPaths
-        guard let path = paths.first else { return nil }
+        guard let path = paths.min() else { return nil }
 
         let configuredNames = parseProcessNames()
         let components = path.split(separator: "/").map { String($0) }
-        if let exactMatch = configuredNames.first(where: { components.contains($0) }) {
+        if let exactMatch = configuredNames.sorted().first(where: { components.contains($0) }) {
             return exactMatch
         }
         return components.last
