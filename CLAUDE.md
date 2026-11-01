@@ -87,4 +87,4 @@ C shims: **CLogShim** (os_log for macOS 10.13), **ClibprocShim** (libproc for PI
 - **Sparkle** auto-update is conditional (`#if KYA_APP_UPDATER_ENABLED`), not always compiled
 - **ProcessMonitor** uses a 3-layer monitoring strategy (check code in `KYADeviceInfo`)
 - **ServiceManagement** (`SMAppService`) for Launch at Login on macOS 13+, with legacy fallback in `KYALauncher/`
-- Deployment target: macOS 10.13, Swift 5.9
+- Deployment target: macOS 12.0 (Xcode 27 拒绝更低版本), Swift 5.9

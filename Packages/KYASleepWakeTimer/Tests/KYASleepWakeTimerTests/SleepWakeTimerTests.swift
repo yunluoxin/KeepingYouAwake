@@ -74,6 +74,8 @@ final class SleepWakeTimerTests: XCTestCase {
         let options = timer.activityOptions
         XCTAssertTrue(options.contains(.idleSystemSleepDisabled),
                       "System sleep must always be disabled")
+        XCTAssertTrue(options.contains(.userInitiated),
+                      "userInitiated must be held to keep timers alive under App Nap")
         XCTAssertFalse(options.contains(.idleDisplaySleepDisabled),
                        "When display sleep is allowed, display sleep must not be disabled")
     }
@@ -83,6 +85,8 @@ final class SleepWakeTimerTests: XCTestCase {
         let options = timer.activityOptions
         XCTAssertTrue(options.contains(.idleSystemSleepDisabled),
                       "System sleep must always be disabled")
+        XCTAssertTrue(options.contains(.userInitiated),
+                      "userInitiated must be held to keep timers alive under App Nap")
         XCTAssertTrue(options.contains(.idleDisplaySleepDisabled),
                       "When display sleep is prevented, display sleep must be disabled too")
     }

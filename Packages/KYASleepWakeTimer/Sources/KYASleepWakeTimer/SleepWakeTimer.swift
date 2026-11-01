@@ -144,8 +144,10 @@ public final class SleepWakeTimer {
     ///
     /// - `.idleSystemSleepDisabled` keeps the system awake.
     /// - `.idleDisplaySleepDisabled` additionally keeps the display awake.
+    /// - `.userInitiated` exempts the process from App Nap/App Sleep so the
+    ///   fire and heartbeat timers keep firing while no window is visible.
     internal var activityOptions: ProcessInfo.ActivityOptions {
-        var options: ProcessInfo.ActivityOptions = [.idleSystemSleepDisabled]
+        var options: ProcessInfo.ActivityOptions = [.idleSystemSleepDisabled, .userInitiated]
         if !UserDefaults.standard.kya_allowDisplaySleep {
             options.insert(.idleDisplaySleepDisabled)
         }
