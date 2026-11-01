@@ -7,20 +7,21 @@
 
 import Foundation
 import AppKit
+import IOKit.pwr_mgt
 import KYAApplicationSupport
 import KYACommon
 
 /// A time interval value representing indefinite scheduling (no timeout).
 /// Pass this value to ``SleepWakeTimer/schedule(timeInterval:completion:)``
-/// for indefinite mode where caffeinate runs without a `-t` timeout.
+/// for indefinite mode where the activation runs until it is invalidated.
 public let indefiniteTimeInterval: TimeInterval = 0
 
-/// Manages the sleep/wake state by spawning `/usr/bin/caffeinate` tasks.
+/// Manages the sleep/wake state by holding an IOKit power assertion.
 ///
-/// Use ``schedule(timeInterval:completion:)`` to activate and
-/// ``invalidate()`` to deactivate. When `timeInterval == 0`
-/// (`indefiniteTimeInterval`), caffeinate runs indefinitely (no `-t` timeout).
-/// When `timeInterval > 0`, caffeinate runs with `-t <seconds>`.
+/// The assertion is held in-process via `ProcessInfo.beginActivity`. macOS 26
+/// and later drop *every* power assertion when `powerd` restarts — they clear
+/// the whole assertion table without telling the holder — so on those systems
+/// the assertion is verified and restored every ``heartbeatInterval`` seconds.
 public final class SleepWakeTimer {
 
     /// Called when the timer activates with the scheduled time interval.
@@ -38,9 +39,12 @@ public final class SleepWakeTimer {
     /// The initial time interval that was used to schedule the timer.
     public private(set) var scheduledTimeInterval: TimeInterval = 0
 
-    /// Returns `true` if a caffeinate task is scheduled and running.
+    /// Returns `true` if a sleep wake activation is in effect.
+    ///
+    /// Reflects the *intent* to prevent sleep. The underlying power assertion
+    /// is restored within ``heartbeatInterval`` seconds should the system drop it.
     public var isScheduled: Bool {
-        caffeinateProcess?.isRunning == true
+        activity != nil
     }
 
     /// An optional completion block called on the main queue when the task
@@ -50,11 +54,33 @@ public final class SleepWakeTimer {
     /// ``invalidate()``, and `false` when the timer expired naturally.
     public var completionBlock: ((Bool) -> Void)?
 
-    private var caffeinateProcess: Process?
-    private var terminationObserver: NSObjectProtocol?
+    // MARK: - Internal
 
-    // Logging via KYALog unified class
-    private let log = KYALog.shared.log(for: "SleepWakeTimer")
+    /// The power assertion currently held. `nil` when no activation is in effect.
+    internal private(set) var activity: NSObjectProtocol?
+
+    /// How often the held assertion is verified and restored if the system dropped it.
+    internal static let heartbeatInterval: TimeInterval = 10
+
+    /// Whether the heartbeat is needed on this system.
+    ///
+    /// macOS 26 and later restart `powerd` regularly, which silently drops
+    /// every power assertion. Older systems keep the assertion for the whole
+    /// lifetime of the holder, so the heartbeat would only burn CPU there.
+    internal static var isHeartbeatRequired: Bool {
+        ProcessInfo.processInfo.isOperatingSystemAtLeast(
+            OperatingSystemVersion(majorVersion: 26, minorVersion: 0, patchVersion: 0)
+        )
+    }
+
+    /// Name of the power assertion. Shows up in `pmset -g assertions`.
+    internal static let assertionReason = "KeepingYouAwake"
+
+    private var fireTimer: Timer?
+
+    /// The heartbeat timer. `nil` when the heartbeat is not needed on this system.
+    internal private(set) var heartbeatTimer: Timer?
+    private var terminationObserver: NSObjectProtocol?
 
     public init() {
         // Terminate all remaining tasks on app quit
@@ -75,7 +101,7 @@ public final class SleepWakeTimer {
 
     // MARK: - Scheduling
 
-    /// Schedule the caffeinate task for a given time interval.
+    /// Schedule the sleep wake activation for a given time interval.
     ///
     /// - Parameter timeInterval: A time interval in seconds. Pass
     ///   `indefiniteTimeInterval` (or `0`) for indefinite mode with no timeout.
@@ -99,79 +125,127 @@ public final class SleepWakeTimer {
             ? Date(timeIntervalSinceNow: timeInterval)
             : nil
 
-        spawnCaffeinateProcess(forTimeInterval: timeInterval)
+        startActivity()
+        startHeartbeat()
+
+        if let fireDate {
+            startFireTimer(at: fireDate)
+        }
     }
 
-    /// Invalidates the timer, terminates the caffeinate process, and resets
-    /// all state.
+    /// Invalidates the timer, releases the power assertion, and resets all state.
     public func invalidate() {
-        fireDate = nil
-        scheduledTimeInterval = 0
-        terminateCaffeinateProcess()
-    }
-
-    // MARK: - Caffeinate Process Handling
-
-    /// Builds the caffeinate command-line arguments for the given time
-    /// interval. Internal visibility for testability.
-    ///
-    /// - Parameter timeInterval: The time interval in seconds. 0 = indefinite.
-    /// - Returns: The argument array for `/usr/bin/caffeinate`.
-    internal func caffeinateArguments(forTimeInterval timeInterval: TimeInterval) -> [String] {
-        let defaults = UserDefaults.standard
-        var arguments: [String] = []
-
-        // Display sleep flag selection (preserves Obj-C logic exactly):
-        // - `-i` when display sleep is allowed (prevent idle sleep only)
-        // - `-di` when display sleep is prevented (prevent idle + display sleep)
-        if defaults.kya_allowDisplaySleep {
-            arguments.append("-i")
-        } else {
-            arguments.append("-di")
-        }
-
-        // Timeout flag
-        if timeInterval != indefiniteTimeInterval {
-            arguments.append("-t")
-            arguments.append(String(format: "%.0f", timeInterval))
-        }
-
-        // Process watch: caffeinate exits when this process terminates
-        arguments.append("-w")
-        arguments.append(String(ProcessInfo.processInfo.processIdentifier))
-
-        return arguments
-    }
-
-    private func spawnCaffeinateProcess(forTimeInterval timeInterval: TimeInterval) {
-        let arguments = caffeinateArguments(forTimeInterval: timeInterval)
-
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/caffeinate")
-        process.arguments = arguments
-
-        caffeinateProcess = process
-
-        process.terminationHandler = { [weak self] _ in
-            self?.handleTermination(cancelled: false)
-        }
-
-        do {
-            try process.run()
-        } catch {
-            KYALog.shared.error("Failed to launch caffeinate: \(error.localizedDescription)", category: "SleepWakeTimer")
-            handleTermination(cancelled: true)
-        }
-    }
-
-    private func terminateCaffeinateProcess() {
-        caffeinateProcess?.terminationHandler = nil
-        caffeinateProcess?.terminate()
         handleTermination(cancelled: true)
     }
 
+    // MARK: - Power Assertion
+
+    /// The activity options matching the "allow display sleep" setting.
+    ///
+    /// - `.idleSystemSleepDisabled` keeps the system awake.
+    /// - `.idleDisplaySleepDisabled` additionally keeps the display awake.
+    internal var activityOptions: ProcessInfo.ActivityOptions {
+        var options: ProcessInfo.ActivityOptions = [.idleSystemSleepDisabled]
+        if !UserDefaults.standard.kya_allowDisplaySleep {
+            options.insert(.idleDisplaySleepDisabled)
+        }
+        return options
+    }
+
+    /// Returns `true` if this process still holds an idle-system-sleep assertion.
+    internal func holdsSystemSleepAssertion() -> Bool {
+        heldAssertionTypes().contains(kIOPMAssertionTypePreventUserIdleSystemSleep as String)
+    }
+
+    /// The assertion types an activation is expected to hold.
+    private var expectedAssertionTypes: Set<String> {
+        var types: Set<String> = [kIOPMAssertionTypePreventUserIdleSystemSleep as String]
+        if !UserDefaults.standard.kya_allowDisplaySleep {
+            types.insert(kIOPMAssertionTypePreventUserIdleDisplaySleep as String)
+        }
+        return types
+    }
+
+    /// The assertion types this process currently holds.
+    private func heldAssertionTypes() -> Set<String> {
+        var assertions: Unmanaged<CFDictionary>?
+        guard IOPMCopyAssertionsByProcess(&assertions) == kIOReturnSuccess,
+              let byProcess = assertions?.takeRetainedValue() as? [AnyHashable: Any],
+              let mine = byProcess[ProcessInfo.processInfo.processIdentifier] as? [[String: Any]]
+        else { return [] }
+
+        return Set(mine.compactMap { $0[kIOPMAssertionTypeKey as String] as? String })
+    }
+
+    /// Verifies the power assertion is still held and recreates it if the
+    /// system dropped it (e.g. after `powerd` restarted).
+    internal func verifyAndRearm() {
+        guard activity != nil else { return }
+        guard !holdsSystemSleepAssertion() else { return }
+
+        KYALog.shared.info("Power assertion was dropped by the system, recreating it", category: "SleepWakeTimer")
+        startActivity()
+    }
+
+    private func startActivity() {
+        endActivity()
+
+        activity = ProcessInfo.processInfo.beginActivity(
+            options: activityOptions,
+            reason: Self.assertionReason
+        )
+
+        if activity == nil {
+            KYALog.shared.error("Failed to create power assertion", category: "SleepWakeTimer")
+        }
+    }
+
+    private func endActivity() {
+        guard let activity else { return }
+
+        // The system drops assertions silently when powerd restarts. Ending an
+        // already dropped activity would only produce a Foundation warning.
+        if !heldAssertionTypes().isDisjoint(with: expectedAssertionTypes) {
+            ProcessInfo.processInfo.endActivity(activity)
+        }
+        self.activity = nil
+    }
+
+    // MARK: - Timers
+
+    private func startHeartbeat() {
+        heartbeatTimer?.invalidate()
+        heartbeatTimer = nil
+
+        guard Self.isHeartbeatRequired else { return }
+
+        let timer = Timer(timeInterval: Self.heartbeatInterval, repeats: true) { [weak self] _ in
+            self?.verifyAndRearm()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        heartbeatTimer = timer
+    }
+
+    private func startFireTimer(at date: Date) {
+        fireTimer?.invalidate()
+
+        let timer = Timer(fire: date, interval: 0, repeats: false) { [weak self] _ in
+            self?.handleTermination(cancelled: false)
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        fireTimer = timer
+    }
+
+    // MARK: - Termination
+
     private func handleTermination(cancelled: Bool) {
-        caffeinateProcess = nil
+        endActivity()
+
+        fireTimer?.invalidate()
+        fireTimer = nil
+        heartbeatTimer?.invalidate()
+        heartbeatTimer = nil
+
         scheduledTimeInterval = 0
         fireDate = nil
 

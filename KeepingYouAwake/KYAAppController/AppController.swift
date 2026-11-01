@@ -35,7 +35,7 @@ final class AppController {
     private var isBatteryOverrideEnabled = false
 
     /// The persistent master switch. When false the app is fully inert:
-    /// no caffeinate timer and no process/display/battery monitoring.
+    /// no sleep wake timer and no process/display/battery monitoring.
     /// Backed by UserDefaults so a real "off" survives relaunch.
     private var isEnabled: Bool {
         get { UserDefaults.standard.kya_enabled }
@@ -115,14 +115,14 @@ final class AppController {
     private func configureSleepWakeTimer() {
         sleepWakeTimer.onActivate = { [weak self] _ in
             self?.enableDevicePowerMonitoring()
-            // schedule() fires onActivate BEFORE the caffeinate process is
-            // spawned, so isScheduled is still false here. Set the icon
+            // schedule() fires onActivate BEFORE the power assertion is
+            // created, so isScheduled is still false here. Set the icon
             // directly instead of deriving it from isScheduled.
             self?.setAppearance(active: true)
         }
         sleepWakeTimer.onDeactivate = { [weak self] in
             self?.disableDevicePowerMonitoring()
-            // The caffeinate process is already gone here, so isScheduled is
+            // The power assertion is already released here, so isScheduled is
             // false and derivation is safe.
             self?.updateAppearance()
         }

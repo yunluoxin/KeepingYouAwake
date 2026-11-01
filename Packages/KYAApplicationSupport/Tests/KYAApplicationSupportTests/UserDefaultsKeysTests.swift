@@ -191,16 +191,16 @@ final class UserDefaultsKeysTests: XCTestCase {
     func testProcessNames() {
         let key = UserDefaults.processNamesKey
 
-        // Default is empty array
-        XCTAssertEqual(defaults.kya_processNames, [])
+        // Unset by default
+        XCTAssertNil(defaults.kya_processNames)
 
-        // Set some names
-        defaults.kya_processNames = ["Terminal", "Safari"]
-        XCTAssertEqual(defaults.kya_processNames, ["Terminal", "Safari"])
-        XCTAssertEqual(defaults.stringArray(forKey: key), ["Terminal", "Safari"])
+        // Names are stored newline separated
+        defaults.kya_processNames = "Terminal\nSafari"
+        XCTAssertEqual(defaults.kya_processNames, "Terminal\nSafari")
+        XCTAssertEqual(defaults.string(forKey: key), "Terminal\nSafari")
 
-        // Set empty array
-        defaults.kya_processNames = []
-        XCTAssertEqual(defaults.kya_processNames, [])
+        // Set empty string
+        defaults.kya_processNames = ""
+        XCTAssertEqual(defaults.kya_processNames, "")
     }
 }

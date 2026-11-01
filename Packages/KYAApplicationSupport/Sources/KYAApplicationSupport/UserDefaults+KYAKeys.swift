@@ -45,7 +45,8 @@ extension UserDefaults {
     }
 
     /// Returns true if the app should allow the display to sleep while still
-    /// keeping the system awake. This exposes the `caffeinate -i` command.
+    /// keeping the system awake. This maps to the display-sleep part of the
+    /// power assertion.
     @objc public var kya_allowDisplaySleep: Bool {
         get { bool(forKey: UserDefaults.allowDisplaySleepKey) }
         set { set(newValue, forKey: UserDefaults.allowDisplaySleepKey) }
@@ -100,7 +101,7 @@ extension UserDefaults {
     }
 
     /// The persistent master switch. When false, the app is fully inert:
-    /// no caffeinate timer and no process/display/battery monitoring,
+    /// no sleep wake timer and no process/display/battery monitoring,
     /// regardless of every other preference. Defaults to true when unset.
     @objc public var kya_enabled: Bool {
         get {

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-KeepingYouAwake is a macOS menu bar utility (v2.0.0) that prevents Macs from sleeping. It wraps `/usr/bin/caffeinate` and supports indefinite or timed activation. LSUIElement app — no dock icon.
+KeepingYouAwake is a macOS menu bar utility (v2.0.0) that prevents Macs from sleeping. It holds an IOKit power assertion in-process (`ProcessInfo.beginActivity`) and supports indefinite or timed activation. LSUIElement app — no dock icon.
 
 This fork recently migrated from Objective-C to Swift. If logic seems unclear, check prior OC commits: `git log --oneline` then `git show <hash>:<path>`.
 
@@ -43,7 +43,7 @@ Activation priority: Process monitoring > External display > Activate on Launch.
 | KYAApplicationSupport | UserDefaults keys, bundle version, launch-at-login, display params | Depends on KYACommon |
 | KYAApplicationEvents | URL scheme event handler | Depends on KYACommon |
 | KYAActivationDurations | Duration model & controller | Depends on KYACommon |
-| KYASleepWakeTimer | **Core engine** — spawns `/usr/bin/caffeinate` | Depends on KYACommon, KYAApplicationSupport |
+| KYASleepWakeTimer | **Core engine** — holds an IOKit power assertion | Depends on KYACommon, KYAApplicationSupport |
 | KYADeviceInfo | Battery, Low Power Mode, process tracking | Depends on ClibprocShim (libproc C shim) |
 | KYAStatusItemUI | Menu bar status item appearance & click handling | Depends on KYACommon, KYAApplicationSupport |
 | KYAUserNotifications | User notification center abstraction | Depends on KYACommon |
@@ -65,7 +65,7 @@ C shims: **CLogShim** (os_log for macOS 10.13), **ClibprocShim** (libproc for PI
 
 两个正交状态，不要混淆：
 
-- **主开关 `kya_enabled`**(UserDefaults,持久化,默认 `true`)= "真关"。OFF = 无 caffeinate、无进程/显示器/电量监听,app 运行但完全惰性,且跨重启保持。触发入口四处等价:status bar 左键、菜单 Disable/Enable、General 设置 checkbox、URL scheme `activate`/`deactivate`。
+- **主开关 `kya_enabled`**(UserDefaults,持久化,默认 `true`)= "真关"。OFF = 无防休眠断言、无进程/显示器/电量监听,app 运行但完全惰性,且跨重启保持。触发入口四处等价:status bar 左键、菜单 Disable/Enable、General 设置 checkbox、URL scheme `activate`/`deactivate`。
 - **激活状态**(`sleepWakeTimer.isScheduled`,运行时)= 当前是否在防休眠,由设置驱动,**纯只读显示**,不是可操作的开关。
 - **图标/菜单不持有状态**:`AppController.updateAppearance()` 统一派生三态 —— 主开关 OFF→`.disabled`(图标降透明度 0.35)、isScheduled→`.active`、否则→`.inactive`。菜单弹出前由 `MainMenuController`(NSMenuDelegate)刷新状态行与开关项。
 
@@ -81,7 +81,9 @@ C shims: **CLogShim** (os_log for macOS 10.13), **ClibprocShim** (libproc for PI
 
 ## Key Technical Details
 
-- **Caffeinate invocations**: indefinite = `caffeinate -di -w <PID>`, timed = `caffeinate -di -t <seconds> -w <PID>`
+- **Power assertion**: `SleepWakeTimer` 进程内持有 `ProcessInfo.beginActivity` 断言 —— `.idleSystemSleepDisabled` 恒开;`kya_allowDisplaySleep == false` 时再加 `.idleDisplaySleepDisabled`。定时模式由 app 自己的 Timer 到 `fireDate` 释放。
+- **powerd 重启会清空整个断言表**(macOS 27 上实测 8 天 57 次),且**不通知持有者** —— 断言会静默消失,app 进程却还活着。因此 `SleepWakeTimer` 每 10s 用 `IOPMCopyAssertionsByProcess` 自查自己 pid 下还有没有 `PreventUserIdleSystemSleep`,掉了就重建。**不要退回"进程活着 == 还在防休眠"的判断**,那是本 bug 的根源。
+- **心跳只在 macOS 26+ 启用**(`SleepWakeTimer.isHeartbeatRequired`):更早的系统不会在 powerd 重启时清空断言表,心跳纯属浪费。实测单次自查 ≈ 0.14ms,10s 一次约 1.2s CPU/天(实测激活/停用 120s 的 CPU 增量无差异),不需要拉长间隔。
 - **Sparkle** auto-update is conditional (`#if KYA_APP_UPDATER_ENABLED`), not always compiled
 - **ProcessMonitor** uses a 3-layer monitoring strategy (check code in `KYADeviceInfo`)
 - **ServiceManagement** (`SMAppService`) for Launch at Login on macOS 13+, with legacy fallback in `KYALauncher/`

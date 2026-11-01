@@ -1,7 +1,7 @@
 //  SleepWakeTimerTests.swift
 //  KYASleepWakeTimerTests
 //
-//  Tests for the Swift SleepWakeTimer (Process wrapper for caffeinate).
+//  Tests for the Swift SleepWakeTimer (IOKit power assertion holder).
 //
 
 import XCTest
@@ -10,14 +10,19 @@ import XCTest
 final class SleepWakeTimerTests: XCTestCase {
 
     var timer: SleepWakeTimer!
+    private var originalAllowDisplaySleep: Bool!
 
     override func setUp() {
+        super.setUp()
         timer = SleepWakeTimer()
+        originalAllowDisplaySleep = UserDefaults.standard.kya_allowDisplaySleep
     }
 
     override func tearDown() {
         timer?.invalidate()
         timer = nil
+        UserDefaults.standard.kya_allowDisplaySleep = originalAllowDisplaySleep
+        super.tearDown()
     }
 
     // MARK: - Indefinite Mode (timeInterval == 0)
@@ -33,23 +38,6 @@ final class SleepWakeTimerTests: XCTestCase {
         XCTAssertEqual(timer.scheduledTimeInterval, 0)
         XCTAssertTrue(timer.isScheduled,
                       "Timer should be scheduled after calling schedule")
-    }
-
-    func testIndefiniteModeCaffeinateArgumentsNoTimeout() {
-        let args = timer.caffeinateArguments(forTimeInterval: 0)
-        // Should NOT contain -t flag
-        XCTAssertFalse(args.contains("-t"),
-                       "Indefinite mode should not include -t flag")
-        XCTAssertFalse(args.contains(where: { $0.hasPrefix("-t") }),
-                       "No -t variant should appear in arguments")
-    }
-
-    func testIndefiniteModeCaffeinateArgumentsIncludesWatchFlag() {
-        let args = timer.caffeinateArguments(forTimeInterval: 0)
-        XCTAssertTrue(args.contains("-w"),
-                       "Arguments must include -w process watch flag")
-        XCTAssertTrue(args.contains(String(ProcessInfo.processInfo.processIdentifier)),
-                       "Arguments must include current PID after -w")
     }
 
     // MARK: - Timed Mode (timeInterval > 0)
@@ -79,42 +67,100 @@ final class SleepWakeTimerTests: XCTestCase {
         }
     }
 
-    func testTimedModeCaffeinateArgumentsIncludeTimeout() {
-        let args = timer.caffeinateArguments(forTimeInterval: 300)
-        XCTAssertTrue(args.contains("-t"),
-                       "Timed mode should include -t flag")
-        // Verify the seconds value appears as a separate argument after -t
-        if let tIndex = args.firstIndex(of: "-t") {
-            let nextIndex = tIndex + 1
-            XCTAssertLessThan(nextIndex, args.count,
-                              "-t should be followed by a seconds value")
-            XCTAssertEqual(args[nextIndex], "300",
-                           "Seconds value should be formatted without decimal")
+    // MARK: - Display Sleep Options
+
+    func testActivityOptionsDisplaySleepAllowed() {
+        UserDefaults.standard.kya_allowDisplaySleep = true
+        let options = timer.activityOptions
+        XCTAssertTrue(options.contains(.idleSystemSleepDisabled),
+                      "System sleep must always be disabled")
+        XCTAssertFalse(options.contains(.idleDisplaySleepDisabled),
+                       "When display sleep is allowed, display sleep must not be disabled")
+    }
+
+    func testActivityOptionsDisplaySleepPrevented() {
+        UserDefaults.standard.kya_allowDisplaySleep = false
+        let options = timer.activityOptions
+        XCTAssertTrue(options.contains(.idleSystemSleepDisabled),
+                      "System sleep must always be disabled")
+        XCTAssertTrue(options.contains(.idleDisplaySleepDisabled),
+                      "When display sleep is prevented, display sleep must be disabled too")
+    }
+
+    // MARK: - Power Assertion
+
+    func testScheduleHoldsPowerAssertion() {
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+        XCTAssertTrue(timer.holdsSystemSleepAssertion(),
+                      "Scheduling must hold an idle system sleep assertion")
+    }
+
+    func testInvalidationReleasesPowerAssertion() {
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+        XCTAssertTrue(timer.holdsSystemSleepAssertion())
+
+        timer.invalidate()
+        XCTAssertFalse(timer.holdsSystemSleepAssertion(),
+                       "Invalidation must release the power assertion")
+    }
+
+    /// macOS drops every power assertion when `powerd` restarts, without
+    /// telling the holder. The timer must detect that and recreate it.
+    func testDroppedAssertionIsRearmed() {
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+        XCTAssertTrue(timer.holdsSystemSleepAssertion())
+
+        // Simulate the system dropping the assertion behind our back.
+        if let activity = timer.activity {
+            ProcessInfo.processInfo.endActivity(activity)
+        }
+        XCTAssertFalse(timer.holdsSystemSleepAssertion(),
+                       "Precondition: the assertion should be gone")
+
+        timer.verifyAndRearm()
+        XCTAssertTrue(timer.holdsSystemSleepAssertion(),
+                      "A dropped assertion must be recreated")
+        XCTAssertTrue(timer.isScheduled)
+    }
+
+    func testVerifyAndRearmKeepsExistingAssertion() {
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+        let activity = timer.activity
+
+        timer.verifyAndRearm()
+
+        XCTAssertTrue(timer.holdsSystemSleepAssertion())
+        XCTAssertTrue(activity === timer.activity,
+                      "A still valid assertion must not be recreated")
+    }
+
+    // MARK: - Heartbeat
+
+    func testHeartbeatRequirementMatchesOSVersion() {
+        let expected = ProcessInfo.processInfo.isOperatingSystemAtLeast(
+            OperatingSystemVersion(majorVersion: 26, minorVersion: 0, patchVersion: 0)
+        )
+        XCTAssertEqual(SleepWakeTimer.isHeartbeatRequired, expected)
+    }
+
+    /// The heartbeat only exists on systems that drop assertions on `powerd` restarts.
+    func testHeartbeatIsOnlyCreatedWhenRequired() {
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+
+        if SleepWakeTimer.isHeartbeatRequired {
+            XCTAssertNotNil(timer.heartbeatTimer,
+                            "The heartbeat must run on macOS 26 and later")
         } else {
-            XCTFail("-t flag not found in arguments")
+            XCTAssertNil(timer.heartbeatTimer,
+                         "The heartbeat must not run on systems that keep the assertion")
         }
     }
 
-    // MARK: - Display Sleep Flags
-
-    func testCaffeinateArgumentsDisplaySleepAllowed() {
-        // When display sleep is allowed, caffeinate uses -i
-        UserDefaults.standard.kya_allowDisplaySleep = true
-        let args = timer.caffeinateArguments(forTimeInterval: 0)
-        XCTAssertTrue(args.contains("-i"),
-                       "When display sleep allowed, should include -i flag")
-        XCTAssertFalse(args.contains("-di"),
-                       "When display sleep allowed, should NOT include -di flag")
-    }
-
-    func testCaffeinateArgumentsDisplaySleepPrevented() {
-        // When display sleep is prevented, caffeinate uses -di
-        UserDefaults.standard.kya_allowDisplaySleep = false
-        let args = timer.caffeinateArguments(forTimeInterval: 0)
-        XCTAssertTrue(args.contains("-di"),
-                       "When display sleep prevented, should include -di flag")
-        XCTAssertFalse(args.contains("-i"),
-                       "When display sleep prevented, should NOT include bare -i")
+    func testInvalidationStopsTheHeartbeat() {
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+        timer.invalidate()
+        XCTAssertNil(timer.heartbeatTimer,
+                     "Invalidation must stop the heartbeat")
     }
 
     // MARK: - Invalidation Lifecycle
@@ -218,16 +264,15 @@ final class SleepWakeTimerTests: XCTestCase {
         XCTAssertTrue(firstCompletionCalled)
     }
 
-    // MARK: - Argument Format Consistency
+    /// Rescheduling must release the previous assertion instead of stacking.
+    func testReschedulingReplacesTheAssertion() {
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+        let first = timer.activity
 
-    func testCaffeinateArgumentsSeparateFlags() {
-        // Verify -t and -w use separate flag/value arguments
-        // (not combined like "-t 300" or "-w 12345" as one string)
-        let args = timer.caffeinateArguments(forTimeInterval: 300)
-        for arg in args {
-            // No argument should contain a space (combined flag+value)
-            XCTAssertFalse(arg.contains(" "),
-                           "Each argument should be a separate element: '\(arg)'")
-        }
+        timer.schedule(timeInterval: indefiniteTimeInterval)
+
+        XCTAssertFalse(first === timer.activity,
+                       "Rescheduling must replace the previous assertion")
+        XCTAssertTrue(timer.holdsSystemSleepAssertion())
     }
 }
